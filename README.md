@@ -1,4 +1,4 @@
-# Multiuser_Whiteboard
+# Multiuser Whiteboard
 
 ## Relevance
 Online learning is becoming more popular today. No doubt, it is both a convenience and a challenge. It gives you a great deal of flexibility, but with that freedom sometimes you need to solve more different problems: organizing of online learning and convenient presentation of information. For this reason, our team is developing an application that will make your online learning better.
