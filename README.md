@@ -9,7 +9,7 @@ Multiuser Whiteboard is a web application that helps you communicate more easily
 ## Help
 Ask questions at multiuserwhiteboard@gmail.com and post issues on github. 
 ## License
-Don\`t forget about the licence. This program is GNU General Public licensed.
+Don\`t forget about the license. This program is GNU General Public licensed.
 ## Contributors
 - [Koroliuk Yaroslav](https://github.com/Koroliuk)
 - [Tretiak Vladyslav](https://github.com/Proxima-C)
