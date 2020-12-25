@@ -14,3 +14,10 @@ UPDATE Users set room_id = 'fdf5d1d3-2d7f-46ef' WHERE id = 1;
 
 UPDATE Users set room_id = 'fdf5d1d3-2d7f-46ef' WHERE id = 5;
 
+INSERT INTO Rooms (id, creator_id, background) VALUES('72f53380-6678-4b98', 2, '#00ff00');
+
+UPDATE Users set room_id = '72f53380-6678-4b98' WHERE id = 2;
+
+UPDATE Users set room_id = '72f53380-6678-4b98' WHERE id = 3;
+
+UPDATE Users set room_id = '72f53380-6678-4b98' WHERE id = 4;
