@@ -25,3 +25,10 @@ CREATE TABLE Shapes (
   dotted boolean NOT NULL,
   filled boolean
 );
+CREATE TABLE Messages (
+  id bigserial PRIMARY KEY,
+  room_id varchar(20) NOT NULL REFERENCES Rooms(id) ON DELETE CASCADE,
+  sender_id bigserial NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
+  time time NOT NULL,
+  text text NOT NULL
+);
