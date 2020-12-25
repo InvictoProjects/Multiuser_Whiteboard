@@ -5,15 +5,15 @@ import java.util.List;
 public class Room {
 
 	private String id;
-	private int creatorId;
+	private User owner;
 	private List<User> participants;
 	private List<Shape> shapes;
 	private List<Message> messages;
 	private String backgroundColor;
 
-	public Room(String id, int creatorId, List<User> participants, List<Shape> shapes, List<Message> messages, String backgroundColor) {
+	public Room(String id, User owner, List<User> participants, List<Shape> shapes, List<Message> messages, String backgroundColor) {
 		this.id = id;
-		this.creatorId = creatorId;
+		this.owner = owner;
 		this.participants = participants;
 		this.shapes = shapes;
 		this.messages = messages;
@@ -21,7 +21,7 @@ public class Room {
 	}
 
 	public boolean isOwner(User user) {
-		return user.getUserType() == UserType.OWNER && user.getId() == creatorId;
+		return user.getUserType() == UserType.OWNER && user == owner;
 	}
 
 	public String getId() {
@@ -32,12 +32,12 @@ public class Room {
 		this.id = id;
 	}
 
-	public int getCreatorId() {
-		return creatorId;
+	public User getOwner() {
+		return owner;
 	}
 
-	public void setCreatorId(int creatorId) {
-		this.creatorId = creatorId;
+	public void setOwner(User owner) {
+		this.owner = owner;
 	}
 
 	public List<User> getParticipants() {
