@@ -4,14 +4,14 @@ import java.util.List;
 
 public class Room {
 
-	int id;
+	private String id;
 	private int creatorId;
 	private List<User> participants;
 	private List<Shape> shapes;
 	private List<Message> messages;
 	private String backgroundColor;
 
-	public Room(int id, int creatorId, List<User> participants, List<Shape> shapes, List<Message> messages, String backgroundColor) {
+	public Room(String id, int creatorId, List<User> participants, List<Shape> shapes, List<Message> messages, String backgroundColor) {
 		this.id = id;
 		this.creatorId = creatorId;
 		this.participants = participants;
@@ -24,11 +24,11 @@ public class Room {
 		return user.getUserType() == UserType.OWNER && user.getId() == creatorId;
 	}
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
