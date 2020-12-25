@@ -4,22 +4,22 @@ import java.time.LocalDateTime;
 
 public class Message {
 
-    private int senderId;
+    private User sender;
     private LocalDateTime time;
     private String text;
 
-    public Message(int senderId, LocalDateTime time, String text) {
-        this.senderId = senderId;
+    public Message(User sender, LocalDateTime time, String text) {
+        this.sender = sender;
         this.time = time;
         this.text = text;
     }
 
-    public int getSenderId() {
-        return senderId;
+    public User getSender() {
+        return sender;
     }
 
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
+    public void setSender(User sender) {
+        this.sender = sender;
     }
 
     public LocalDateTime getTime() {
