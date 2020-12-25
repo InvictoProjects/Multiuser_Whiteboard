@@ -1,4 +1,4 @@
-CREATE TYPE user_type AS ENUM ('room_guest', 'room_creator');
+CREATE TYPE user_type AS ENUM ('room_guest', 'room_owner');
 
 CREATE TABLE Users (
   id bigserial PRIMARY KEY,
@@ -11,7 +11,7 @@ CREATE TABLE Users (
 
 CREATE TABLE Rooms (
   id varchar(20) PRIMARY KEY,
-  creator_id bigserial NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  owner_id bigserial NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   background bytea NOT NULL
 );
 
@@ -23,7 +23,8 @@ CREATE TABLE Shapes (
   path PATH NOT NULL,
   thickness integer NOT NULL,
   dotted boolean NOT NULL,
-  filled boolean
+  filled boolean,
+  color bytea NOT NULL
 );
 CREATE TABLE Messages (
   id bigserial PRIMARY KEY,
