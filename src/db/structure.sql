@@ -9,3 +9,26 @@ CREATE TABLE Users (
   draw_permission boolean NOT NULL
 );
 
+CREATE TABLE Rooms (
+  id varchar(20) PRIMARY KEY,
+  creator_id bigserial NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  background bytea NOT NULL
+);
+
+ALTER TABLE Users ADD CONSTRAINT fk_room_id FOREIGN KEY (room_id) REFERENCES Rooms(id) ON DELETE CASCADE;
+
+CREATE TABLE Shapes (
+  id bigserial PRIMARY KEY,
+  room_id varchar(20) NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+  path PATH NOT NULL,
+  thickness integer NOT NULL,
+  dotted boolean NOT NULL,
+  filled boolean
+);
+CREATE TABLE Messages (
+  id bigserial PRIMARY KEY,
+  room_id varchar(20) NOT NULL REFERENCES Rooms(id) ON DELETE CASCADE,
+  sender_id bigserial NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
+  time time NOT NULL,
+  text text NOT NULL
+);
