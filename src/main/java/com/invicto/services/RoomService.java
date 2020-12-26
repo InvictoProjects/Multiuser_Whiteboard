@@ -1,6 +1,10 @@
 package com.invicto.services;
 
-import com.invicto.domain.*;
+import com.invicto.domain.Message;
+import com.invicto.domain.Room;
+import com.invicto.domain.Shape;
+import com.invicto.domain.User;
+import com.invicto.domain.UserType;
 import com.invicto.exceptions.PermissionException;
 import com.invicto.storage.RoomRepository;
 
