@@ -1,9 +1,12 @@
 package com.invicto.services;
 
+import com.invicto.domain.Room;
 import com.invicto.domain.User;
 import com.invicto.domain.UserType;
 import com.invicto.exceptions.PermissionException;
 import com.invicto.storage.UserRepository;
+
+import java.util.List;
 
 import static com.invicto.exceptions.EntityExistsException.userAlreadyExists;
 import static com.invicto.exceptions.EntityNotExistsException.userIsNotExist;
@@ -39,31 +42,22 @@ public class UserService {
         if (user == null) {
             throw userIsNotExist(editedUser);
         } else {
-            userRepository.updateLogin(editedUser, login);
+            userRepository.update(editedUser, login, editedUser.getUserType(), editedUser.isWritePermission(), editedUser.isWritePermission());
         }
     }
 
-    public void updateType(User caller, User editedUser, UserType userType) throws PermissionException {
-        if (caller != null) {
+    public void updatePermissions(User caller, User editedUser, Room room, boolean wPermission, boolean dPermission) throws PermissionException {
+        List<User> participants = room.getParticipants();
+        boolean isTheSameRoom = (participants.contains(caller) && participants.contains(editedUser));
+        boolean isCallerOwner = (caller.getUserType() == UserType.OWNER);
+        if (!isTheSameRoom || !isCallerOwner) {
             throw notEnoughPermission(caller);
         }
         User user = userRepository.findById(editedUser.getId());
         if (user == null) {
             throw userIsNotExist(editedUser);
         } else {
-            userRepository.updateType(editedUser, userType);
-        }
-    }
-
-    public void updatePermissions(User caller, User editedUser, boolean wPermission, boolean dPermission) throws PermissionException {
-        if (caller.getUserType() != UserType.OWNER) {
-            throw notEnoughPermission(caller);
-        }
-        User user = userRepository.findById(editedUser.getId());
-        if (user == null) {
-            throw userIsNotExist(editedUser);
-        } else {
-            userRepository.updatePermissions(editedUser, wPermission, dPermission);
+            userRepository.update(editedUser, editedUser.getLogin(), editedUser.getUserType(), wPermission, dPermission);
         }
     }
 

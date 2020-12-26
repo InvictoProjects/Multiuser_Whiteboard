@@ -27,4 +27,5 @@ public class EntityExistsException extends IllegalArgumentException {
     public static EntityExistsException userAlreadyExists(User user) {
         return userAlreadyExists(user.getId());
     }
+
 }
