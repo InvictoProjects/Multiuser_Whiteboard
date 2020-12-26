@@ -4,7 +4,6 @@ import com.invicto.domain.Message;
 import com.invicto.domain.Room;
 import com.invicto.domain.Shape;
 import com.invicto.domain.User;
-import com.invicto.domain.UserType;
 import com.invicto.exceptions.PermissionException;
 import com.invicto.storage.RoomRepository;
 
@@ -21,7 +20,9 @@ public class RoomService {
     }
 
     public void updateBackgroundColor(User caller, Room room, String backgroundColor) throws PermissionException {
-        if (!room.getParticipants().contains(caller) || caller.getUserType() != UserType.OWNER) {
+        boolean isCallerInRoom = room.getParticipants().contains(caller);
+        boolean isCallerOwner = caller.equals(room.getOwner());
+        if (!isCallerInRoom || !isCallerOwner) {
             throw notEnoughPermission(caller);
         }
         if (!roomRepository.existsById(room.getId())) {
@@ -32,7 +33,9 @@ public class RoomService {
     }
 
     public void addShape(User caller, Room room, Shape shape) throws PermissionException {
-        if (!room.getParticipants().contains(caller) || !caller.isDrawPermission()) {
+        boolean isCallerInRoom = room.getParticipants().contains(caller);
+        boolean isCallerCanDraw = caller.isDrawPermission();
+        if (!isCallerInRoom || !isCallerCanDraw) {
             throw notEnoughPermission(caller);
         }
         if (!roomRepository.existsById(room.getId())) {
@@ -43,7 +46,9 @@ public class RoomService {
     }
 
     public void addMessage(User caller, Room room, Message message) throws PermissionException {
-        if (!room.getParticipants().contains(caller) || !caller.isWritePermission()) {
+        boolean isCallerInRoom = room.getParticipants().contains(caller);
+        boolean isCallerCanWrite = caller.isWritePermission();
+        if (!isCallerInRoom || !isCallerCanWrite) {
             throw notEnoughPermission(caller);
         }
         if (!roomRepository.existsById(room.getId())) {
@@ -54,7 +59,7 @@ public class RoomService {
     }
 
     public void deleteMessage(User caller, Room room, Message message) throws PermissionException {
-        if (message.getSender() != caller) {
+        if (caller.equals(message.getSender())) {
             throw notEnoughPermission(caller);
         }
         if (!roomRepository.existsById(room.getId())) {
