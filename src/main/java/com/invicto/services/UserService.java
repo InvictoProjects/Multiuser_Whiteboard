@@ -9,7 +9,6 @@ import static com.invicto.exceptions.EntityExistsException.userAlreadyExists;
 import static com.invicto.exceptions.EntityNotExistsException.userIsNotExist;
 import static com.invicto.exceptions.PermissionException.notEnoughPermission;
 
-
 public class UserService {
 
     private UserRepository userRepository;
