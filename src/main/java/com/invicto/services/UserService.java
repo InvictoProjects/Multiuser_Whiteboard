@@ -35,8 +35,9 @@ public class UserService {
     }
 
     public void updateLogin(User caller, String login) {
-        if (userRepository.findById(caller.getId()) != null) {
-            userRepository.update(caller, login, caller.getUserType(), caller.isWritePermission(), caller.isWritePermission());
+        if (userRepository.existsById(caller.getId())) {
+            caller.setLogin(login);
+            userRepository.update(caller, caller);
         }
     }
 
@@ -47,8 +48,10 @@ public class UserService {
         if (!isTheSameRoom || !isCallerOwner) {
             throw notEnoughPermission(caller);
         }
-        if (userRepository.findById(editedUser.getId()) != null) {
-            userRepository.update(editedUser, editedUser.getLogin(), editedUser.getUserType(), wPermission, dPermission);
+        if (userRepository.existsById(editedUser.getId())) {
+            editedUser.setWritePermission(wPermission);
+            editedUser.setDrawPermission(dPermission);
+            userRepository.update(editedUser, editedUser);
         }
     }
 
