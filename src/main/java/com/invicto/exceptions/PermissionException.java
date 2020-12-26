@@ -9,7 +9,7 @@ public class PermissionException extends IllegalAccessException {
 	}
 
 	public static PermissionException notEnoughPermission(int user_id) {
-		return new PermissionException("Not enough permission for user: " + user);
+		return new PermissionException("Not enough permission for user: " + user_id);
 	}
 
 	public static PermissionException notEnoughPermission(User user) {
