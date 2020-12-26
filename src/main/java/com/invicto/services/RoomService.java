@@ -1,9 +1,6 @@
 package com.invicto.services;
 
-import com.invicto.domain.Message;
-import com.invicto.domain.Room;
-import com.invicto.domain.Shape;
-import com.invicto.domain.User;
+import com.invicto.domain.*;
 import com.invicto.exceptions.PermissionException;
 import com.invicto.storage.RoomRepository;
 
@@ -21,7 +18,7 @@ public class RoomService {
 
     public void updateBackgroundColor(User caller, Room room, String backgroundColor) throws PermissionException {
         boolean isCallerInRoom = room.getParticipants().contains(caller);
-        boolean isCallerOwner = caller.equals(room.getOwner());
+        boolean isCallerOwner = caller.getUserType() == UserType.OWNER;
         if (!isCallerInRoom || !isCallerOwner) {
             throw notEnoughPermission(caller);
         }
