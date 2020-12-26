@@ -3,7 +3,6 @@ package com.invicto.exceptions;
 import com.invicto.domain.User;
 import com.invicto.domain.Room;
 
-
 public class EntityExistsException extends IllegalArgumentException {
 
     public final String entityType;
