@@ -5,8 +5,8 @@ public class User {
     private int id;
     private String login;
     private UserType userType;
-    boolean writePermission;
-    boolean drawPermission;
+    private boolean writePermission;
+    private boolean drawPermission;
 
     public User(int id, String login, UserType userType, boolean writePermission, boolean drawPermission) {
         this.id = id;
