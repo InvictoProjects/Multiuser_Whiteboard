@@ -14,7 +14,7 @@ import static com.invicto.exceptions.PermissionException.notEnoughPermission;
 
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -34,15 +34,9 @@ public class UserService {
         userRepository.delete(deleteUser);
     }
 
-    public void updateLogin(User caller, User editedUser, String login) throws PermissionException {
-        if (caller.getId() != editedUser.getId()) {
-            throw notEnoughPermission(caller);
-        }
-        User user = userRepository.findById(editedUser.getId());
-        if (user == null) {
-            throw userIsNotExist(editedUser);
-        } else {
-            userRepository.update(editedUser, login, editedUser.getUserType(), editedUser.isWritePermission(), editedUser.isWritePermission());
+    public void updateLogin(User caller, String login) {
+        if (userRepository.findById(caller.getId()) != null) {
+            userRepository.update(caller, login, caller.getUserType(), caller.isWritePermission(), caller.isWritePermission());
         }
     }
 
@@ -53,15 +47,16 @@ public class UserService {
         if (!isTheSameRoom || !isCallerOwner) {
             throw notEnoughPermission(caller);
         }
-        User user = userRepository.findById(editedUser.getId());
-        if (user == null) {
-            throw userIsNotExist(editedUser);
-        } else {
+        if (userRepository.findById(editedUser.getId()) != null) {
             userRepository.update(editedUser, editedUser.getLogin(), editedUser.getUserType(), wPermission, dPermission);
         }
     }
 
-    public User findById(int id){
-        return userRepository.findById(id);
+    public User findById(int id) {
+        User user = userRepository.findById(id);
+        if (user == null) {
+            throw userIsNotExist(id);
+        }
+        return user;
     }
 }
