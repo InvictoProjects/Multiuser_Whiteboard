@@ -37,7 +37,7 @@ public class UserService {
     public void updateLogin(User caller, String login) {
         if (userRepository.existsById(caller.getId())) {
             caller.setLogin(login);
-            userRepository.update(caller, caller);
+            userRepository.update(caller);
         }
     }
 
@@ -51,7 +51,7 @@ public class UserService {
         if (userRepository.existsById(editedUser.getId())) {
             editedUser.setWritePermission(wPermission);
             editedUser.setDrawPermission(dPermission);
-            userRepository.update(editedUser, editedUser);
+            userRepository.update(editedUser);
         }
     }
 

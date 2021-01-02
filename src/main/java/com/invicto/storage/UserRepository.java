@@ -6,7 +6,7 @@ import com.invicto.domain.UserType;
 public interface UserRepository {
 
     void save(User user);
-    void update(User user, User editedUser);
+    void update(User editedUser);
     void delete(User user);
     User findById(int id);
     boolean existsById(int id);
