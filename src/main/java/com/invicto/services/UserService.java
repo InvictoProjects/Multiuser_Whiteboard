@@ -34,10 +34,12 @@ public class UserService {
         userRepository.delete(deleteUser);
     }
 
-    public void updateLogin(User caller, String login) {
+    public void updateLogin(User caller, String login) throws PermissionException {
         if (userRepository.existsById(caller.getId())) {
             caller.setLogin(login);
             userRepository.update(caller);
+        } else {
+            throw notEnoughPermission(caller);
         }
     }
 
@@ -61,5 +63,9 @@ public class UserService {
             throw userIsNotExist(id);
         }
         return user;
+    }
+
+    public boolean existsById(int id) {
+        return userRepository.existsById(id);
     }
 }
