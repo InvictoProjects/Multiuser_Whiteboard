@@ -1,7 +1,6 @@
 package com.invicto.storage;
 
 import com.invicto.domain.User;
-import com.invicto.domain.UserType;
 
 public interface UserRepository {
 
