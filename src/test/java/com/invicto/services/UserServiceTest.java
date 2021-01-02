@@ -95,10 +95,4 @@ public class UserServiceTest {
         when(mockedRepo.findById(1)).thenReturn(user1);
         service.findById(3);
     }
-
-    @Test
-    public void existsById() {
-        service.existsById(1);
-        verify(mockedRepo, times(1)).existsById(1);
-    }
 }
