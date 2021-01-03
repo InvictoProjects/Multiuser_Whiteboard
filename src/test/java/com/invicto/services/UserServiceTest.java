@@ -1,6 +1,8 @@
 package com.invicto.services;
 
-import com.invicto.domain.*;
+import com.invicto.domain.User;
+import com.invicto.domain.UserType;
+import com.invicto.domain.Room;
 import com.invicto.exceptions.EntityExistsException;
 import com.invicto.exceptions.EntityNotExistsException;
 import com.invicto.exceptions.PermissionException;
