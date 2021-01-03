@@ -1,76 +1,46 @@
 package com.invicto.storage.postgresql;
 
 import java.sql.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Connector {
-    private static final Logger log = Logger.getLogger(Connector.class.getName());
+    private static final Logger logger = Logger.getLogger(Connector.class.getName());
     private final String url;
     private final String user;
     private final String password;
     private Connection connection;
 
-    public Connector(Builder builder) {
-        this.url = builder.getUrl();
-        this.user = builder.getUser();
-        this.password = builder.getPassword();
+    public Connector(String url, String user, String password) {
+        this.url = url;
+        this.user = user;
+        this.password = password;
     }
 
     public void getConnection() {
         try {
             connection = DriverManager.getConnection(url, user, password);
-            if (connection != null) {
-                log.info("Connection OK");
-            } else {
-                log.info("Connection Failed");
-            }
-        } catch (SQLException e) {
-            log.info(String.valueOf(e));
+            logger.info("Connection OK");
+        } catch (SQLException exception) {
+            logger.log(Level.SEVERE, "Connection failed", exception);
         }
     }
 
-    public ResultSet executeStatement(String command) {
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(command);
-            statement.close();
-            return resultSet;
-        } catch (SQLException ex) {
-            return null;
+    public ResultSet executeQuery(String command) {
+        ResultSet resultSet = null;
+        try (Statement statement = connection.createStatement()) {
+            resultSet = statement.executeQuery(command);
+        } catch (SQLException exception) {
+            logger.log(Level.SEVERE, "SQLException", exception);
         }
+        return resultSet;
     }
 
-    public static class Builder {
-        private String url;
-        private String user;
-        private String password;
-
-        public Builder setUrl(String url) {
-            this.url = url;
-            return this;
-        }
-
-        public Builder setUser(String user) {
-            this.user = user;
-            return this;
-        }
-
-        public Builder setPassword(String password) {
-            this.password = password;
-            return this;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-
-        public String getUser() {
-            return user;
-        }
-
-        public String getPassword() {
-            return password;
+    public void executeUpdate(String command) {
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(command);
+        } catch (SQLException exception) {
+            logger.log(Level.SEVERE, "SQLException", exception);
         }
     }
 }
