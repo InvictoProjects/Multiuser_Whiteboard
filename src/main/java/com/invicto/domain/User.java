@@ -4,13 +4,15 @@ public class User {
 
     private int id;
     private String login;
+    private String roomId;
     private UserType userType;
     private boolean writePermission;
     private boolean drawPermission;
 
-    public User(int id, String login, UserType userType, boolean writePermission, boolean drawPermission) {
+    public User(int id, String login, String roomId, UserType userType, boolean writePermission, boolean drawPermission) {
         this.id = id;
         this.login = login;
+        this.roomId = roomId;
         this.userType = userType;
         this.writePermission = writePermission;
         this.drawPermission = drawPermission;
@@ -30,6 +32,14 @@ public class User {
 
     public void setLogin(String login) {
         this.login = login;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
     public UserType getUserType() {

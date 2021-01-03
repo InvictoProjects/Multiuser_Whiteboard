@@ -28,8 +28,8 @@ public class UserServiceTest {
     public void setUp() {
         mockedRepo = mock(UserRepository.class);
         service = new UserService(mockedRepo);
-        user1 = new User(1, "Yahoo", UserType.OWNER, true, true);
-        user2 = new User(2, "Makoto", UserType.GUEST, false, true);
+        user1 = new User(1, "Yahoo", "1", UserType.OWNER, true, true);
+        user2 = new User(2, "Makoto", "1", UserType.GUEST, false, true);
     }
 
     @Test(expected = EntityExistsException.class)
