@@ -1,8 +1,6 @@
 package com.invicto.services;
 
-import com.invicto.domain.Room;
-import com.invicto.domain.User;
-import com.invicto.domain.UserType;
+import com.invicto.domain.*;
 import com.invicto.exceptions.PermissionException;
 import com.invicto.storage.UserRepository;
 import com.invicto.storage.RoomRepository;
@@ -13,19 +11,20 @@ import static com.invicto.exceptions.EntityExistsException.roomAlreadyExists;
 import static com.invicto.exceptions.EntityExistsException.userAlreadyExists;
 import static com.invicto.exceptions.EntityNotExistsException.roomIsNotExist;
 import static com.invicto.exceptions.EntityNotExistsException.userIsNotExist;
+import static com.invicto.exceptions.EntityNotExistsException.messageIsNotExist;
 import static com.invicto.exceptions.PermissionException.notEnoughPermission;
 
 public class RoomService {
 
 	private final RoomRepository roomRepository;
 	private final UserRepository userRepository;
-
-	public RoomService(RoomRepository roomRepository, UserRepository userRepository) {
+    
+    public RoomService(RoomRepository roomRepository, UserRepository userRepository) {
 		this.roomRepository = roomRepository;
 		this.userRepository = userRepository;
 	}
 
-	public void save(User caller, Room room) throws PermissionException {
+    public void save(User caller, Room room) throws PermissionException {
 		if (caller.getUserType() != UserType.OWNER) {
 			throw notEnoughPermission(caller);
 		}
@@ -35,7 +34,7 @@ public class RoomService {
 		roomRepository.save(room);
 	}
 
-	public void delete(User caller, String roomId) throws PermissionException {
+    public void delete(User caller, String roomId) throws PermissionException {
 		if (caller.getUserType() != UserType.OWNER) {
 			throw notEnoughPermission(caller);
 		}
@@ -46,7 +45,7 @@ public class RoomService {
 		roomRepository.delete(room);
 	}
 
-	public void addUser(User user, String roomId) {
+    public void addUser(User user, String roomId) {
 		if (userRepository.existsById(user.getId())) {
 			throw userAlreadyExists(user);
 		}
@@ -60,7 +59,7 @@ public class RoomService {
 		roomRepository.update(room);
 	}
 
-	public void deleteUser(int userId, String roomId) {
+    public void deleteUser(int userId, String roomId) {
 		if (!userRepository.existsById(userId)) {
 			throw userIsNotExist(userId);
 		}
@@ -77,7 +76,7 @@ public class RoomService {
 		}
 	}
 
-	public void changeOwner(User caller, int userId, String roomId) throws PermissionException {
+    public void changeOwner(User caller, int userId, String roomId) throws PermissionException {
 		if (caller.getUserType() != UserType.OWNER) {
 			throw notEnoughPermission(caller);
 		}
@@ -93,11 +92,77 @@ public class RoomService {
 		}
 	}
 
-	public List<User> getUsers(String roomId) {
+    public List<User> getUsers(String roomId) {
 		if (!roomRepository.existsById(roomId)) {
 			throw roomIsNotExist(roomId);
 		}
 		Room room = roomRepository.findById(roomId);
 		return room.getParticipants();
 	}
+    
+    public void updateBackgroundColor(User caller, Room room, String backgroundColor) throws PermissionException {
+        boolean isCallerInRoom = room.getParticipants().contains(caller);
+        boolean isCallerOwner = caller.getUserType() == UserType.OWNER;
+        if (!isCallerInRoom || !isCallerOwner) {
+            throw notEnoughPermission(caller);
+        }
+        if (!roomRepository.existsById(room.getId())) {
+            throw roomIsNotExist(room);
+        }
+        room.setBackgroundColor(backgroundColor);
+        roomRepository.update(room);
+    }
+
+    public void addShape(User caller, Room room, Shape shape) throws PermissionException {
+        boolean isCallerInRoom = room.getParticipants().contains(caller);
+        boolean isCallerCanDraw = caller.isDrawPermission();
+        if (!isCallerInRoom || !isCallerCanDraw) {
+            throw notEnoughPermission(caller);
+        }
+        if (!roomRepository.existsById(room.getId())) {
+            throw roomIsNotExist(room);
+        }
+        room.getShapes().add(shape);
+        roomRepository.saveNewShape(shape);
+    }
+
+    public void addMessage(User caller, Room room, Message message) throws PermissionException {
+        boolean isCallerInRoom = room.getParticipants().contains(caller);
+        boolean isCallerCanWrite = caller.isWritePermission();
+        if (!isCallerInRoom || !isCallerCanWrite) {
+            throw notEnoughPermission(caller);
+        }
+        if (!roomRepository.existsById(room.getId())) {
+            throw roomIsNotExist(room);
+        }
+        room.getMessages().add(message);
+        roomRepository.saveNewMessage(message);
+    }
+
+    public void deleteMessage(User caller, Room room, Message message) throws PermissionException {
+        if (caller.equals(message.getSender())) {
+            throw notEnoughPermission(caller);
+        }
+        if (!roomRepository.existsById(room.getId())) {
+            throw roomIsNotExist(room);
+        }
+        room.getMessages().remove(message);
+        roomRepository.deleteMessage(message);
+    }
+
+    public Room findById(String roomId) {
+        Room room = roomRepository.findById(roomId);
+        if (room == null) {
+            throw roomIsNotExist(roomId);
+        }
+        return room;
+    }
+
+    public Message findMessageById(int messageId) {
+        Message message = roomRepository.findMessageById(messageId);
+        if (message == null) {
+            throw messageIsNotExist(messageId);
+        }
+        return message;
+    }
 }
