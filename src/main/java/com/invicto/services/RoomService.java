@@ -4,6 +4,7 @@ import com.invicto.domain.Room;
 import com.invicto.domain.User;
 import com.invicto.domain.UserType;
 import com.invicto.exceptions.PermissionException;
+import com.invicto.storage.UserRepository;
 import com.invicto.storage.RoomRepository;
 
 import java.util.List;
@@ -34,40 +35,40 @@ public class RoomService {
 		roomRepository.save(room);
 	}
 
-	public void delete(User caller, String room_id) throws PermissionException {
+	public void delete(User caller, String roomId) throws PermissionException {
 		if (caller.getUserType() != UserType.OWNER) {
 			throw notEnoughPermission(caller);
 		}
-		if (!roomRepository.existsById(room_id)) {
-			throw roomIsNotExist(room_id);
+		if (!roomRepository.existsById(roomId)) {
+			throw roomIsNotExist(roomId);
 		}
-		Room room = roomRepository.findById(room_id);
+		Room room = roomRepository.findById(roomId);
 		roomRepository.delete(room);
 	}
 
-	public void addUser(User user, String room_id) {
+	public void addUser(User user, String roomId) {
 		if (userRepository.existsById(user.getId())) {
 			throw userAlreadyExists(user);
 		}
-		if (!roomRepository.existsById(room_id)) {
-			throw roomIsNotExist(room_id);
+		if (!roomRepository.existsById(roomId)) {
+			throw roomIsNotExist(roomId);
 		}
-		Room room = roomRepository.findById(room_id);
+		Room room = roomRepository.findById(roomId);
 		List<User> participants = room.getParticipants();
 		participants.add(user);
 		room.setParticipants(participants);
 		roomRepository.update(room);
 	}
 
-	public void deleteUser(int user_id, String room_id) {
-		if (!userRepository.existsById(user_id)) {
-			throw userIsNotExist(user_id);
+	public void deleteUser(int userId, String roomId) {
+		if (!userRepository.existsById(userId)) {
+			throw userIsNotExist(userId);
 		}
-		if (!roomRepository.existsById(room_id)) {
-			throw roomIsNotExist(room_id);
+		if (!roomRepository.existsById(roomId)) {
+			throw roomIsNotExist(roomId);
 		}
-		User user = userRepository.findById(user_id);
-		Room room = roomRepository.findById(room_id);
+		User user = userRepository.findById(userId);
+		Room room = roomRepository.findById(roomId);
 		List<User> participants = room.getParticipants();
 		if (participants.contains(user)) {
 			participants.remove(user);
@@ -76,15 +77,15 @@ public class RoomService {
 		}
 	}
 
-	public void changeOwner(User caller, int user_id, String room_id) throws PermissionException {
+	public void changeOwner(User caller, int userId, String roomId) throws PermissionException {
 		if (caller.getUserType() != UserType.OWNER) {
 			throw notEnoughPermission(caller);
 		}
-		if (!userRepository.existsById(user_id)) {
-			throw userIsNotExist(user_id);
+		if (!userRepository.existsById(userId)) {
+			throw userIsNotExist(userId);
 		}
-		User user = userRepository.findById(user_id);
-		Room room = roomRepository.findById(room_id);
+		User user = userRepository.findById(userId);
+		Room room = roomRepository.findById(roomId);
 		List<User> participants = room.getParticipants();
 		if (participants.contains(user)) {
 			user.setUserType(UserType.OWNER);
@@ -92,11 +93,11 @@ public class RoomService {
 		}
 	}
 
-	public List<User> getUsers(String room_id) {
-		if (!roomRepository.existsById(room_id)) {
-			throw roomIsNotExist(room_id);
+	public List<User> getUsers(String roomId) {
+		if (!roomRepository.existsById(roomId)) {
+			throw roomIsNotExist(roomId);
 		}
-		Room room = roomRepository.findById(room_id);
+		Room room = roomRepository.findById(roomId);
 		return room.getParticipants();
 	}
 }
