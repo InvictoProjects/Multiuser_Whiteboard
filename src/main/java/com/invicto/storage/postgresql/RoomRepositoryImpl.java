@@ -163,9 +163,10 @@ public class RoomRepositoryImpl implements RoomRepository {
 				"'" + text + "') RETURNING id";
 		ResultSet result = connector.executeQuery(statement);
 		try {
-			result.next();
-			int id = result.getInt(1);
-			message.setId(id);
+		    if (result.next()) {
+                int id = result.getInt(1);
+                message.setId(id);
+            }
 		} catch (SQLException e) {
 			message.setId(null);
 		}
