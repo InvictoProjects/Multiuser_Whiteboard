@@ -14,9 +14,13 @@ import java.util.List;
 
 public class RoomRepositoryImpl implements RoomRepository {
 
-	private Connector connector;
-	private UserRepository userRepository;
-	private RoomRepository roomRepository;
+	private final Connector connector;
+	private final UserRepository userRepository;
+
+	public RoomRepositoryImpl(Connector connector, UserRepository userRepository) {
+		this.connector = connector;
+		this.userRepository = userRepository;
+	}
 
 	@Override
 	public void save(Room room) {
@@ -91,11 +95,12 @@ public class RoomRepositoryImpl implements RoomRepository {
 
 		ResultSet result = connector.executeQuery(statement);
 		while (result.next()) {
-			String color = result.getString(7);
+			String path = result.getString(3);
 			int thickness = result.getInt(4);
 			boolean dotted = result.getBoolean(5);
 			boolean filled = result.getBoolean(6);
-			Shape shape = new Shape(color, thickness, dotted, filled);
+			String color = result.getString(7);
+			Shape shape = new Shape(roomId, path, thickness, dotted, filled, color);
 			shapes.add(shape);
 		}
 		return shapes;
@@ -108,7 +113,7 @@ public class RoomRepositoryImpl implements RoomRepository {
 		ResultSet result = connector.executeQuery(statement);
 		while (result.next()) {
 			int messageId = result.getInt(1);
-			Message message = roomRepository.findMessageById(messageId);
+			Message message = findMessageById(messageId);
 			messages.add(message);
 		}
 		return messages;
