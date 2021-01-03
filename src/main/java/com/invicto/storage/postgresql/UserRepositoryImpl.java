@@ -13,10 +13,19 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void save(User user) {
-        String statement = "INSERT INTO Users(id, login, room_id, user_type, write_permission, draw_permission) " +
-                "VALUES('" + user.getId() + "', '" + user.getLogin() + "', '" + user.getRoomId() + "', '" + user.getUserType().toString() +
-                "', " + String.valueOf(user.isWritePermission()).toUpperCase() + ", " + String.valueOf(user.isDrawPermission()).toUpperCase() + ")";
-        connector.executeUpdate(statement);
+        String statement = "INSERT INTO Users(login, room_id, user_type, write_permission, draw_permission) " +
+                "VALUES('" + user.getLogin() + "', '" + user.getRoomId() + "', '" + user.getUserType().toString() +
+                "', " + String.valueOf(user.isWritePermission()).toUpperCase() + ", " + String.valueOf(user.isDrawPermission()).toUpperCase() + ")"+
+                "RETURNING id";
+        ResultSet result = connector.executeQuery(statement);
+        try {
+            if (result.next()) {
+                Integer id = result.getInt("id");
+                user.setId(id);
+            }
+        } catch (SQLException e) {
+            user.setId(null);
+        }
     }
 
     @Override

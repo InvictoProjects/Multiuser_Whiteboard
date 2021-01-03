@@ -2,14 +2,14 @@ package com.invicto.domain;
 
 public class User {
 
-    private int id;
+    private Integer id;
     private String login;
     private String roomId;
     private UserType userType;
     private boolean writePermission;
     private boolean drawPermission;
 
-    public User(int id, String login, String roomId, UserType userType, boolean writePermission, boolean drawPermission) {
+    public User(Integer id, String login, String roomId, UserType userType, boolean writePermission, boolean drawPermission) {
         this.id = id;
         this.login = login;
         this.roomId = roomId;
@@ -18,11 +18,11 @@ public class User {
         this.drawPermission = drawPermission;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
