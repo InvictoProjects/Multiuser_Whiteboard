@@ -26,14 +26,14 @@ public class RoomRepositoryImpl implements RoomRepository {
 		String backgroundColor = room.getBackgroundColor();
 		String statement = "INSERT INTO Rooms (id, owner_id, background) " +
 				"VALUES('" + roomId + "', " + ownerId + " , '"+ backgroundColor +"');";
-		connector.executeQuery(statement);
+		connector.executeUpdate(statement);
 	}
 
 	@Override
 	public void delete(Room room) {
 		String id = room.getId();
 		String statement = "DELETE FROM Rooms WHERE id = '" + id + "'";
-		connector.executeQuery(statement);
+		connector.executeUpdate(statement);
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class RoomRepositoryImpl implements RoomRepository {
 		String statement = "UPDATE Rooms SET " + "(owner_id, background) = " +
 				"('" + ownerId + "', " + backgroundColor + "') " +
 				"WHERE id = '" + roomId + "'";
-		connector.executeQuery(statement);
+		connector.executeUpdate(statement);
 	}
 
 	@Override
