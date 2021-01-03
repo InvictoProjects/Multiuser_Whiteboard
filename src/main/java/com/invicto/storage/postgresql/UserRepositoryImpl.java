@@ -15,15 +15,16 @@ public class UserRepositoryImpl implements UserRepository {
     public void save(User user) {
         String statement = "INSERT INTO Users(id, login, room_id, user_type, write_permission, draw_permission) " +
                 "VALUES('" + user.getId() + "', '" + user.getLogin() + "', '" + user.getRoomId() + "', '" + user.getUserType().toString() +
-                "', '" + String.valueOf(user.isWritePermission()).toUpperCase() + "', '" + String.valueOf(user.isDrawPermission()).toUpperCase() + "')";
+                "', " + String.valueOf(user.isWritePermission()).toUpperCase() + ", " + String.valueOf(user.isDrawPermission()).toUpperCase() + ")";
         connector.executeUpdate(statement);
     }
 
     @Override
     public void update(User editedUser) {
-        String statement = "UPDATE Users SET (id, login, room_id, user_type, write_permission, draw_permission) " +
-                "VALUES('" + editedUser.getId() + "', '" + editedUser.getLogin() + "', '" + editedUser.getRoomId() + "', '" + editedUser.getUserType().toString() +
-                "', '" + String.valueOf(editedUser.isWritePermission()).toUpperCase() + "', '" + String.valueOf(editedUser.isDrawPermission()).toUpperCase() + "')";
+        String statement = "UPDATE Users SET (login, room_id, user_type, write_permission, draw_permission) " +
+                "VALUES('" + editedUser.getLogin() + "', '" + editedUser.getRoomId() + "', '" + editedUser.getUserType().toString() +
+                "', " + String.valueOf(editedUser.isWritePermission()).toUpperCase() + ", " + String.valueOf(editedUser.isDrawPermission()).toUpperCase() + ")" +
+                "WHERE id = " + editedUser.getId();
         connector.executeUpdate(statement);
     }
 
