@@ -1,16 +1,16 @@
 package com.invicto.domain;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class Message {
 
     private Integer id;
     private String roomId;
     private User sender;
-    private LocalDateTime time;
+    private LocalTime time;
     private String text;
 
-    public Message(Integer id, String roomId, User sender, LocalDateTime time, String text) {
+    public Message(Integer id, String roomId, User sender, LocalTime time, String text) {
         this.id = id;
         this.roomId = roomId;
         this.sender = sender;
@@ -42,11 +42,11 @@ public class Message {
         this.sender = sender;
     }
 
-    public LocalDateTime getTime() {
+    public LocalTime getTime() {
         return time;
     }
 
-    public void setTime(LocalDateTime time) {
+    public void setTime(LocalTime time) {
         this.time = time;
     }
 
