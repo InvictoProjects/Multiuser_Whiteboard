@@ -19,10 +19,9 @@ public class UserRepositoryImpl implements UserRepository {
                 "RETURNING id";
         ResultSet result = connector.executeQuery(statement);
         try {
-            if (result.next()) {
-                Integer id = result.getInt("id");
-                user.setId(id);
-            }
+            result.next();
+            Integer id = result.getInt("id");
+            user.setId(id);
         } catch (SQLException e) {
             user.setId(null);
         }
