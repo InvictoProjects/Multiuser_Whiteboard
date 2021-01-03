@@ -36,12 +36,11 @@ public class Connector {
         return resultSet;
     }
 
-    public ResultSet executeUpdate(String command) {
+    public void executeUpdate(String command) {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(command);
         } catch (SQLException exception) {
             logger.log(Level.SEVERE, "SQLException", exception);
         }
-        return null;
     }
 }
