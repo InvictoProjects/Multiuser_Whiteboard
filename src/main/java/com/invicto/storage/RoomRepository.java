@@ -10,7 +10,7 @@ public interface RoomRepository {
 
 	void update(Room room);
 
-	Room findById(String room_id);
+	Room findById(String roomId);
 
-	boolean existsById(String room_id);
+	boolean existsById(String roomId);
 }
