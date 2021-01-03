@@ -72,7 +72,7 @@ public class RoomRepositoryImpl implements RoomRepository {
 		}
 	}
 
-	ArrayList<User> getParticipants(String roomId) throws SQLException {
+	private ArrayList<User> getParticipants(String roomId) throws SQLException {
 		String statement = "Select * FROM Users WHERE room_id = '" + roomId + "'";
 		ArrayList<User> participants = new ArrayList<>();
 
@@ -85,7 +85,7 @@ public class RoomRepositoryImpl implements RoomRepository {
 		return participants;
 	}
 
-	ArrayList<Shape> getShapes(String roomId) throws SQLException {
+	private ArrayList<Shape> getShapes(String roomId) throws SQLException {
 		String statement = "Select * FROM Shapes WHERE room_id = '" + roomId + "'";
 		ArrayList<Shape> shapes = new ArrayList<>();
 
@@ -101,7 +101,7 @@ public class RoomRepositoryImpl implements RoomRepository {
 		return shapes;
 	}
 
-	ArrayList<Message> getMessages(String roomId) throws SQLException {
+	private ArrayList<Message> getMessages(String roomId) throws SQLException {
 		String statement = "Select * FROM Messages WHERE room_id = '" + roomId + "'";
 		ArrayList<Message> messages = new ArrayList<>();
 
