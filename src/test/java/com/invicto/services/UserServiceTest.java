@@ -25,8 +25,8 @@ public class UserServiceTest {
     public void setUp() {
         mockedRepo = mock(UserRepository.class);
         service = new UserService(mockedRepo);
-        user1 = new User(1, "Yaropolk", UserType.OWNER, true, true);
-        user2 = new User(2, "Mykyto", UserType.GUEST, false, true);
+        user1 = new User(1, "Yahoo", UserType.OWNER, true, true);
+        user2 = new User(2, "Makoto", UserType.GUEST, false, true);
     }
 
     @Test(expected = EntityExistsException.class)
@@ -60,7 +60,7 @@ public class UserServiceTest {
     public void updatePermissionsByOwnerForTheSameRoom() throws PermissionException {
         List<Shape> shapeArray = new ArrayList<>();
         List<Message> messageArray = new ArrayList<>();
-        Room room = new Room("afRefwef32pj9WJ23", user1, List.of(user1, user2), shapeArray, messageArray, "#FFFFFF");
+        Room room = new Room("afReef32pj9WJ23", user1, List.of(user1, user2), shapeArray, messageArray, "#FFFFFF");
         when(mockedRepo.existsById(2)).thenReturn(true);
         service.updatePermissions(user1, user2, room, true, false);
         verify(mockedRepo, times(1)).update(user2);
@@ -70,7 +70,7 @@ public class UserServiceTest {
     public void updatePermissionsByNotOwner() throws PermissionException {
         List<Shape> shapeArray = new ArrayList<>();
         List<Message> messageArray = new ArrayList<>();
-        Room room = new Room("afRefwef32pj9WJ23", user1, List.of(user1, user2), shapeArray, messageArray, "#FFFFFF");
+        Room room = new Room("afReef32pj9WJ23", user1, List.of(user1, user2), shapeArray, messageArray, "#FFFFFF");
         when(mockedRepo.existsById(2)).thenReturn(true);
         service.updatePermissions(user2, user2, room, false, false);
     }
@@ -79,7 +79,7 @@ public class UserServiceTest {
     public void updatePermissionsForDifferentRooms() throws PermissionException {
         List<Shape> shapeArray = new ArrayList<>();
         List<Message> messageArray = new ArrayList<>();
-        Room room = new Room("afRefwef32pj9WJ23", user1, List.of(user2), shapeArray, messageArray, "#FFFFFF");
+        Room room = new Room("afReef32pj9WJ23", user1, List.of(user2), shapeArray, messageArray, "#FFFFFF");
         when(mockedRepo.existsById(2)).thenReturn(true);
         service.updatePermissions(user1, user2, room, false, false);
     }
