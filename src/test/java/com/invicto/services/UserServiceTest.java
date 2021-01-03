@@ -8,11 +8,12 @@ import com.invicto.storage.UserRepository;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static java.util.Collections.emptyList;
+
 
 public class UserServiceTest {
 
@@ -58,9 +59,7 @@ public class UserServiceTest {
 
     @Test
     public void updatePermissionsByOwnerForTheSameRoom() throws PermissionException {
-        List<Shape> shapeArray = new ArrayList<>();
-        List<Message> messageArray = new ArrayList<>();
-        Room room = new Room("afReef32pj9WJ23", user1, List.of(user1, user2), shapeArray, messageArray, "#FFFFFF");
+        Room room = new Room("afReef32pj9WJ23", user1, List.of(user1, user2), emptyList(), emptyList(), "#FFFFFF");
         when(mockedRepo.existsById(2)).thenReturn(true);
         service.updatePermissions(user1, user2, room, true, false);
         verify(mockedRepo, times(1)).update(user2);
@@ -68,18 +67,14 @@ public class UserServiceTest {
 
     @Test(expected = PermissionException.class)
     public void updatePermissionsByNotOwner() throws PermissionException {
-        List<Shape> shapeArray = new ArrayList<>();
-        List<Message> messageArray = new ArrayList<>();
-        Room room = new Room("afReef32pj9WJ23", user1, List.of(user1, user2), shapeArray, messageArray, "#FFFFFF");
+        Room room = new Room("afReef32pj9WJ23", user1, List.of(user1, user2), emptyList(), emptyList(), "#FFFFFF");
         when(mockedRepo.existsById(2)).thenReturn(true);
         service.updatePermissions(user2, user2, room, false, false);
     }
 
     @Test(expected = PermissionException.class)
     public void updatePermissionsForDifferentRooms() throws PermissionException {
-        List<Shape> shapeArray = new ArrayList<>();
-        List<Message> messageArray = new ArrayList<>();
-        Room room = new Room("afReef32pj9WJ23", user1, List.of(user2), shapeArray, messageArray, "#FFFFFF");
+        Room room = new Room("afReef32pj9WJ23", user1, List.of(user2), emptyList(), emptyList(), "#FFFFFF");
         when(mockedRepo.existsById(2)).thenReturn(true);
         service.updatePermissions(user1, user2, room, false, false);
     }
