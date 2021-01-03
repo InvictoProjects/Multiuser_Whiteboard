@@ -1,10 +1,14 @@
 package com.invicto.storage;
 
-import com.invicto.domain.Message;
 import com.invicto.domain.Room;
+import com.invicto.domain.Message;
 import com.invicto.domain.Shape;
 
 public interface RoomRepository {
+
+    void save(Room room);
+
+    void delete(Room room);
 
     void update(Room room);
 
