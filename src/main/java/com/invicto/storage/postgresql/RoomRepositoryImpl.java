@@ -152,24 +152,24 @@ public class RoomRepositoryImpl implements RoomRepository {
 
 	@Override
 	public void saveNewMessage(Message message) {
-		int senderId = message.getSender().getId();
-		String roomId = message.getRoomId();
-		LocalTime time = message.getTime();
-		String text = message.getText();
-		String statement = "INSERT INTO Messages (room_id, sender_id, time, text) " +
-				"VALUES('" + roomId + "', " +
-				senderId + ", " +
-				"'" + time + "', " +
-				"'" + text + "') RETURNING id";
-		ResultSet result = connector.executeQuery(statement);
-		try {
-		    if (result.next()) {
+	    int senderId = message.getSender().getId();
+	    String roomId = message.getRoomId();
+	    LocalTime time = message.getTime();
+	    String text = message.getText();
+	    String statement = "INSERT INTO Messages (room_id, sender_id, time, text) " +
+		        "VALUES('" + roomId + "', " +
+		        senderId + ", " +
+		        "'" + time + "', " +
+		        "'" + text + "') RETURNING id";
+	    ResultSet result = connector.executeQuery(statement);
+	    try {
+	        if (result.next()) {
                 int id = result.getInt(1);
                 message.setId(id);
             }
-		} catch (SQLException e) {
-			message.setId(null);
-		}
+	    } catch (SQLException e) {
+	        message.setId(null);
+	    }
 	}
 
 	@Override

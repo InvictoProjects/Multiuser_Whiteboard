@@ -105,7 +105,7 @@ public class RoomService {
 	}
     
     public void updateBackgroundColor(User caller, String roomId, String backgroundColor) throws PermissionException {
-		Room room = findById(roomId);
+        Room room = findById(roomId);
         boolean isCallerInRoom = room.getParticipants().contains(caller);
         boolean isCallerOwner = caller.getUserType() == UserType.OWNER;
         if (!isCallerInRoom || !isCallerOwner) {
@@ -119,7 +119,7 @@ public class RoomService {
     }
 
     public void addShape(User caller, String roomId, Shape shape) throws PermissionException {
-		Room room = findById(roomId);
+        Room room = findById(roomId);
         boolean isCallerInRoom = room.getParticipants().contains(caller);
         boolean isCallerCanDraw = caller.isDrawPermission();
         if (!isCallerInRoom || !isCallerCanDraw) {
@@ -134,7 +134,7 @@ public class RoomService {
     }
 
     public void addMessage(User caller, String roomId, Message message) throws PermissionException {
-		Room room = findById(roomId);
+        Room room = findById(roomId);
         boolean isCallerInRoom = room.getParticipants().contains(caller);
         boolean isCallerCanWrite = caller.isWritePermission();
         if (!isCallerInRoom || !isCallerCanWrite) {
@@ -149,7 +149,7 @@ public class RoomService {
     }
 
     public void deleteMessage(User caller, String roomId, Message message) throws PermissionException {
-		Room room = findById(roomId);
+        Room room = findById(roomId);
         if (caller.equals(message.getSender())) {
             throw notEnoughPermission(caller);
         }
