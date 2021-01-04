@@ -9,21 +9,25 @@ import java.sql.SQLException;
 
 public class UserRepositoryImpl implements UserRepository {
 
-    private Connector connector;
+    private final Connector connector;
+
+    public UserRepositoryImpl(Connector connector) {
+        this.connector = connector;
+    }
 
     @Override
     public void save(User user) {
         String statement = "INSERT INTO Users(login, room_id, user_type, write_permission, draw_permission) " +
                 "VALUES('" + user.getLogin() + "', '" + user.getRoomId() + "', '" + user.getUserType().toString() +
                 "', " + String.valueOf(user.isWritePermission()).toUpperCase() + ", " + String.valueOf(user.isDrawPermission()).toUpperCase() + ")"+
-                "RETURNING id";
+                " RETURNING id";
         ResultSet result = connector.executeQuery(statement);
         try {
             if (result.next()) {
                 Integer id = result.getInt("id");
                 user.setId(id);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             user.setId(null);
         }
     }
@@ -33,7 +37,7 @@ public class UserRepositoryImpl implements UserRepository {
         String statement = "UPDATE Users SET (login, room_id, user_type, write_permission, draw_permission) " +
                 "VALUES('" + editedUser.getLogin() + "', '" + editedUser.getRoomId() + "', '" + editedUser.getUserType().toString() +
                 "', " + String.valueOf(editedUser.isWritePermission()).toUpperCase() + ", " + String.valueOf(editedUser.isDrawPermission()).toUpperCase() + ")" +
-                "WHERE id = " + editedUser.getId();
+                " WHERE id = " + editedUser.getId();
         connector.executeUpdate(statement);
     }
 
@@ -61,8 +65,8 @@ public class UserRepositoryImpl implements UserRepository {
                 } else {
                     userType = UserType.GUEST;
                 }
-                boolean wPermission = result.getString("write_permission").equals("TRUE");
-                boolean dPermission = result.getString("draw_permission").equals("TRUE");
+                boolean wPermission = result.getBoolean("write_permission");
+                boolean dPermission = result.getBoolean("draw_permission");
                 return new User(id, login, roomId, userType, wPermission, dPermission);
             } catch (SQLException e) {
                 return null;
