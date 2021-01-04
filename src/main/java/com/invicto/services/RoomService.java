@@ -89,6 +89,10 @@ public class RoomService {
 		if (participants.contains(user)) {
 			user.setUserType(UserType.OWNER);
 			caller.setUserType(UserType.GUEST);
+			room.setOwner(user);
+			userRepository.update(user);
+			userRepository.update(caller);
+			roomRepository.update(room);
 		}
 	}
 
@@ -100,7 +104,8 @@ public class RoomService {
 		return room.getParticipants();
 	}
     
-    public void updateBackgroundColor(User caller, Room room, String backgroundColor) throws PermissionException {
+    public void updateBackgroundColor(User caller, String roomId, String backgroundColor) throws PermissionException {
+        Room room = findById(roomId);
         boolean isCallerInRoom = room.getParticipants().contains(caller);
         boolean isCallerOwner = caller.getUserType() == UserType.OWNER;
         if (!isCallerInRoom || !isCallerOwner) {
@@ -113,7 +118,8 @@ public class RoomService {
         roomRepository.update(room);
     }
 
-    public void addShape(User caller, Room room, Shape shape) throws PermissionException {
+    public void addShape(User caller, String roomId, Shape shape) throws PermissionException {
+        Room room = findById(roomId);
         boolean isCallerInRoom = room.getParticipants().contains(caller);
         boolean isCallerCanDraw = caller.isDrawPermission();
         if (!isCallerInRoom || !isCallerCanDraw) {
@@ -123,10 +129,12 @@ public class RoomService {
             throw roomIsNotExist(room);
         }
         room.getShapes().add(shape);
+        shape.setRoomId(roomId);
         roomRepository.saveNewShape(shape);
     }
 
-    public void addMessage(User caller, Room room, Message message) throws PermissionException {
+    public void addMessage(User caller, String roomId, Message message) throws PermissionException {
+        Room room = findById(roomId);
         boolean isCallerInRoom = room.getParticipants().contains(caller);
         boolean isCallerCanWrite = caller.isWritePermission();
         if (!isCallerInRoom || !isCallerCanWrite) {
@@ -136,10 +144,12 @@ public class RoomService {
             throw roomIsNotExist(room);
         }
         room.getMessages().add(message);
+        message.setRoomId(roomId);
         roomRepository.saveNewMessage(message);
     }
 
-    public void deleteMessage(User caller, Room room, Message message) throws PermissionException {
+    public void deleteMessage(User caller, String roomId, Message message) throws PermissionException {
+        Room room = findById(roomId);
         if (caller.equals(message.getSender())) {
             throw notEnoughPermission(caller);
         }
