@@ -9,14 +9,19 @@ import com.invicto.storage.RoomRepository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoomRepositoryImpl implements RoomRepository {
 
-	private Connector connector;
-	private UserRepository userRepository;
-	private RoomRepository roomRepository;
+	private final Connector connector;
+	private final UserRepository userRepository;
+
+	public RoomRepositoryImpl(Connector connector, UserRepository userRepository) {
+		this.connector = connector;
+		this.userRepository = userRepository;
+	}
 
 	@Override
 	public void save(Room room) {
@@ -91,11 +96,12 @@ public class RoomRepositoryImpl implements RoomRepository {
 
 		ResultSet result = connector.executeQuery(statement);
 		while (result.next()) {
-			String color = result.getString(7);
+			String path = result.getString(3);
 			int thickness = result.getInt(4);
 			boolean dotted = result.getBoolean(5);
 			boolean filled = result.getBoolean(6);
-			Shape shape = new Shape(color, thickness, dotted, filled);
+			String color = result.getString(7);
+			Shape shape = new Shape(roomId, path, thickness, dotted, filled, color);
 			shapes.add(shape);
 		}
 		return shapes;
@@ -108,7 +114,7 @@ public class RoomRepositoryImpl implements RoomRepository {
 		ResultSet result = connector.executeQuery(statement);
 		while (result.next()) {
 			int messageId = result.getInt(1);
-			Message message = roomRepository.findMessageById(messageId);
+			Message message = findMessageById(messageId);
 			messages.add(message);
 		}
 		return messages;
@@ -128,21 +134,64 @@ public class RoomRepositoryImpl implements RoomRepository {
 
 	@Override
 	public void saveNewShape(Shape shape) {
-
+		String roomId = shape.getRoomId();
+		String path = shape.getPath();
+		int thickness = shape.getThickness();
+		boolean dotted = shape.isDotted();
+		boolean filled = shape.isFilled();
+		String color = shape.getColor();
+		String statement = "INSERT INTO Shapes (room_id, path, thickness, dotted, filled, color) " +
+				"VALUES('" + roomId + "', " +
+				"path('" + path + "'), " +
+				thickness + ", " +
+				String.valueOf(dotted).toUpperCase() + ", " +
+				String.valueOf(filled).toUpperCase() + ", " +
+				"'" + color + "')";
+		connector.executeUpdate(statement);
 	}
 
 	@Override
 	public void saveNewMessage(Message message) {
-
+	    int senderId = message.getSender().getId();
+	    String roomId = message.getRoomId();
+	    LocalTime time = message.getTime();
+	    String text = message.getText();
+	    String statement = "INSERT INTO Messages (room_id, sender_id, time, text) " +
+		        "VALUES('" + roomId + "', " +
+		        senderId + ", " +
+		        "'" + time + "', " +
+		        "'" + text + "') RETURNING id";
+	    ResultSet result = connector.executeQuery(statement);
+	    try {
+	        if (result.next()) {
+                int id = result.getInt(1);
+                message.setId(id);
+            }
+	    } catch (SQLException | NullPointerException e) {
+	        message.setId(null);
+	    }
 	}
 
 	@Override
 	public Message findMessageById(int messageId) {
-		return null;
-	}
+        String statement = "SELECT * FROM Messages WHERE id = " + messageId;
+        ResultSet result = connector.executeQuery(statement);
+        try {
+            String roomId = result.getString(2);
+            int senderId = result.getInt(3);
+            User sender = userRepository.findById(senderId);
+            LocalTime time = result.getObject(4, LocalTime.class);
+            String text = result.getString(5);
+            return new Message(messageId, roomId, sender, time, text);
+        } catch (SQLException e) {
+            return null;
+        }
+    }
 
 	@Override
 	public void deleteMessage(Message message) {
-
+	    Integer id = message.getId();
+	    String statement = "DELETE FROM Messages WHERE id" + id;
+	    connector.executeUpdate(statement);
 	}
 }
