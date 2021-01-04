@@ -83,8 +83,8 @@ public class UserRepositoryImplTest {
         when(result1.getString("login")).thenReturn("Vasyl");
         when(result1.getString("room_id")).thenReturn("13o23fh09ffwefSFJF");
         when(result1.getString("user_type")).thenReturn(String.valueOf(UserType.OWNER));
-        when(result1.getString("write_permission")).thenReturn("TRUE");
-        when(result1.getString("draw_permission")).thenReturn("TRUE");
+        when(result1.getBoolean("write_permission")).thenReturn(true);
+        when(result1.getBoolean("draw_permission")).thenReturn(true);
         User user12 = userRepository.findById(1);
         assertEquals(user1.getId(), user12.getId());
         assertEquals(user1.getLogin(), user12.getLogin());

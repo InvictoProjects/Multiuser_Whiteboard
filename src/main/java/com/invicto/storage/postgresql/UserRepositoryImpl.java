@@ -65,8 +65,8 @@ public class UserRepositoryImpl implements UserRepository {
                 } else {
                     userType = UserType.GUEST;
                 }
-                boolean wPermission = result.getString("write_permission").equals("TRUE");
-                boolean dPermission = result.getString("draw_permission").equals("TRUE");
+                boolean wPermission = result.getBoolean("write_permission");
+                boolean dPermission = result.getBoolean("draw_permission");
                 return new User(id, login, roomId, userType, wPermission, dPermission);
             } catch (SQLException e) {
                 return null;
