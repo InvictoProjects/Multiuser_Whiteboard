@@ -167,7 +167,7 @@ public class RoomRepositoryImpl implements RoomRepository {
                 int id = result.getInt(1);
                 message.setId(id);
             }
-	    } catch (SQLException e) {
+	    } catch (SQLException | NullPointerException e) {
 	        message.setId(null);
 	    }
 	}
