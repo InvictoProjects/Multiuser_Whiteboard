@@ -170,7 +170,7 @@ public class WebSocket extends Thread {
     }
 
     static class Ping extends Thread {
-        WebSocket ws;
+        private final WebSocket ws;
 
         public Ping(WebSocket ws){
             this.ws = ws;
@@ -189,15 +189,15 @@ public class WebSocket extends Thread {
         }
     }
 
-    static String utf8ToString(byte[] a) {
+    private String utf8ToString(byte[] a) {
         return new String(a, StandardCharsets.UTF_8);
     }
 
-    static String base64Enc(byte[] a) {
+    private String base64Enc(byte[] a) {
         return Base64.getEncoder().encodeToString(a);
     }
 
-    static byte[] sha1(String input) throws NoSuchAlgorithmException {
+    private byte[] sha1(String input) throws NoSuchAlgorithmException {
         MessageDigest mDigest = MessageDigest.getInstance("SHA1");
         return mDigest.digest(input.getBytes());
     }
