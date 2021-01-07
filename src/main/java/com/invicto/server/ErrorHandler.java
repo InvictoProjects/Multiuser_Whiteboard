@@ -1,6 +1,6 @@
 package com.invicto.server;
 
-class ErrorHandler extends HttpHandler {
+class ErrorHandler implements HttpHandler {
 
   private final int code;
 

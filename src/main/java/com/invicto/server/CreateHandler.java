@@ -2,22 +2,25 @@ package com.invicto.server;
 
 import java.util.Random;
 
-public class CreateHandler extends HttpHandler {
+public class CreateHandler implements HttpHandler {
 
     private final HttpRouter router;
+    private String id;
 
     public CreateHandler(HttpRouter router) {
         this.router = router;
     }
 
-    private void createRoom() {
-        String id = generateRoomId();
-        router.addHandler(id, new WhiteboardHandler());
-    }
-
     @Override
     public void handle(HttpRequest request, HttpResponse response) {
         createRoom();
+        response.message(200, id, "text/plain");
+    }
+
+    private void createRoom() {
+        id = generateRoomId();
+        router.addHandler("/" + id, new FileHandler("board.html"));
+        router.addHandler("/" + id + "/ws", new WebSocketHandler());
     }
 
     private String generateRoomId() {
