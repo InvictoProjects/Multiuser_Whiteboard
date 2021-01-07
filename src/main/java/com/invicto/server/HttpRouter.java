@@ -12,14 +12,17 @@ public class HttpRouter {
         handlers = new HashMap<>();
         errorHandler = new ErrorHandler(501);
         defaultHandler = null;
-        addHandler("", new MainHandler());
-        addHandler("create", new CreateHandler(this));
+        addHandler("/", new FileHandler("index.html"));
+        addHandler("/create", new CreateHandler(this));
+        addHandler("/css/index.css", new FileHandler("css/index.css"));
+        addHandler("/js/index.js", new FileHandler("js/index.js"));
+        addHandler("/js/board.js", new FileHandler("js/board.js"));
     }
 
-    public HttpHandler route(String pathSegment, HttpRequest request) {
+    public HttpHandler route(String pathSegment) {
         if (handlers.containsKey(pathSegment)) {
-            String requestPath = request.getPath();
-            request.setPath(requestPath.substring(pathSegment.length() + 1));
+            //String requestPath = request.getPath();
+            //request.setPath(requestPath.substring(pathSegment.length() + 1));
             return handlers.get(pathSegment);
         } else if (defaultHandler != null) {
             return defaultHandler;

@@ -19,10 +19,10 @@ public class HttpRequest implements Runnable {
     public static final String HEAD_REQUEST_TYPE = "HEAD";
     public static final String DELETE_REQUEST_TYPE = "DELETE";
     public static final String PUT_REQUEST_TYPE = "PUT";
-    private static final Logger logger = Logger.getLogger("HttpRequest");
+    private static final Logger logger = Logger.getLogger(HttpRequest.class.getName());
     private final HttpRouter router;
     private final Socket connection;
-    private String httpRequest;
+    private String stringRequest;
     private String requestLine;
     private String requestType;
     private String path;
@@ -30,9 +30,8 @@ public class HttpRequest implements Runnable {
     private final Map<String, String> headers = new HashMap<>();
     private final List<String> splitPath = new ArrayList<>();
     private final Map<String, String> params = new HashMap<>();
-    private final List<String> varargs = new ArrayList<>();
 
-    public HttpRequest(HttpRouter router, Socket connection) throws IOException, HttpException {
+    public HttpRequest(HttpRouter router, Socket connection) throws IOException {
         this.router = router;
         connection.setKeepAlive(true);
         this.connection = connection;
@@ -41,10 +40,16 @@ public class HttpRequest implements Runnable {
     @Override
     public void run() {
         if (connection.isClosed()) {
-            logger.info("Socket is closed...");
+            logger.info("Socket is closed");
         }
         try {
-            createResponse().respond();
+            parseRequest();
+            if (!headers.containsKey("Upgrade")) {
+                HttpResponse resp = createResponse();
+                resp.respond();
+            } else {
+                determineHandler().handle(this, null);
+            }
         } catch (IOException | HttpException e) {
             e.printStackTrace();
         }
@@ -58,9 +63,8 @@ public class HttpRequest implements Runnable {
     }
 
     public HttpResponse createResponse() throws IOException, HttpException {
-        parseRequest();
         HttpResponse response = new HttpResponse(this);
-        determineHandler().handle(this, response);
+        determineHandler().handle(this,  response);
         return response;
     }
 
@@ -69,7 +73,7 @@ public class HttpRequest implements Runnable {
         StringBuilder requestBuilder = new StringBuilder();
         String firstLine = input.readLine();
         if (firstLine == null) {
-            throw new HttpException("Input is returning nulls...");
+            throw new HttpException("Input is returning nulls");
         }
         while (firstLine.isEmpty()) {
             firstLine = input.readLine();
@@ -101,7 +105,7 @@ public class HttpRequest implements Runnable {
             String[] data = requestBody.split("&");
             params.putAll(parseInputData(data));
         }
-        httpRequest = requestBuilder.toString();
+        stringRequest = requestBuilder.toString();
     }
 
     private Map<String, String> parseInputData(String[] data) {
@@ -120,10 +124,10 @@ public class HttpRequest implements Runnable {
 
     public HttpHandler determineHandler() {
         if (router == null) {
-            return new DeathHandler();
+            return new ErrorHandler();
         }
-        String path = splitPath.isEmpty() ? "" : splitPath.get(0);
-        return router.route(path, this);
+        //String sPath = splitPath.isEmpty() ? "" : splitPath.get(splitPath.size()-1);
+        return router.route(path); // was sPath, this
     }
 
     public boolean isType(String requestTypeCheck) {
@@ -184,28 +188,12 @@ public class HttpRequest implements Runnable {
         return headers;
     }
 
-    public void mergeParams(Map<String, String> data) {
-        this.params.putAll(data);
-    }
-
-    public String getParam(String key) {
-        return this.params.get(key);
-    }
-
-    public void mergeVarargs(List<String> data) {
-        this.varargs.addAll(data);
-    }
-
-    public List<String> getVarargs() {
-        return this.varargs;
-    }
-
     public void setHttpRequest(String httpRequest) {
-        this.httpRequest = httpRequest;
+        this.stringRequest = httpRequest;
     }
 
     public String getHttpRequest() {
-        return httpRequest;
+        return stringRequest;
     }
 
     public String getRequestType() {
