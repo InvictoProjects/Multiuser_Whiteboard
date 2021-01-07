@@ -8,21 +8,11 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 
 public class WebSocket extends Thread {
-    Socket connection;
+    private Socket connection;
     private WsEventListener wsEventListener;
-
-    public void setWebSockets(List<WebSocket> webSockets) {
-        this.webSockets = webSockets;
-    }
-
-    private List<WebSocket> webSockets;
-
-    public WebSocket() {
-    }
 
     public final WebSocket accept(ServerSocket serverSocket, String request) throws Exception {
         return accept(serverSocket.accept(), request);
