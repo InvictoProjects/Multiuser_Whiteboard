@@ -14,31 +14,26 @@ public class HttpResponse {
     public static final String NOT_A_METHOD_ERROR = "No known method";
     public static final String MALFORMED_INPUT_ERROR = "Malformed Input";
     public static final String STATUS_GOOD = "All systems are go";
-    private static final Logger logger = Logger.getLogger("HttpResponse");
-    private static String serverInfo;
+    private static final Logger logger = Logger.getLogger(HttpResponse.class.getName());
     private static Map<Integer, String> responses;
     private final HttpRequest request;
     private int code = 200;
     private byte[] body;
     private String mimeType = "text/plain";
-    private long size = -1;
-    private Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
     private final Socket socket;
     private final DataOutputStream writer;
 
     public HttpResponse(HttpRequest req) throws IOException {
-        if (serverInfo == null || serverInfo.isEmpty()) {
-            setupServerInfo();
-        }
         socket = req.getConnection();
         writer = new DataOutputStream(socket.getOutputStream());
         request = req;
     }
 
-    public void message(int code, String message) {
+    public void message(int code, String message, String mimeType) {
         this.code = code;
         setBody(message);
-        mimeType = "text/plain";
+        this.mimeType = mimeType;
     }
 
     public void noContent() {
@@ -49,7 +44,7 @@ public class HttpResponse {
 
     public void error(int code, String message, Throwable t) {
         t.printStackTrace();
-        message(code, message);
+        message(code, message, mimeType);
     }
 
     public void respond() {
@@ -59,18 +54,13 @@ public class HttpResponse {
             } else if (socket.isClosed()) {
                 throw new HttpException("Socket is closed...");
             }
-            if(body == null) {
+            if (body == null) {
                 noContent();
             }
             writeLine("HTTP/1.1 " + getResponseCodeMessage(code));
-            writeLine("Server: " + serverInfo);
             writeLine("Content-Type: " + mimeType);
             writeLine("Connection: close");
-            if (size != -1) {
-                writeLine("Content-Size: " + size);
-            } else {
-                writeLine("Content-Size: " + body.length);
-            }
+            writeLine("Content-Size: " + body.length);
             if (!headers.isEmpty()) {
                 StringBuilder b = new StringBuilder();
                 for (String key : headers.keySet()) {
@@ -87,7 +77,7 @@ public class HttpResponse {
             }
             writer.write(body);
         } catch (HttpException | IOException e) {
-            logger.log(Level.SEVERE, "Something bad happened while trying to send data " + "to the client");
+            logger.log(Level.SEVERE, "Something bad happened while trying to send data to the client");
             e.printStackTrace();
         } finally {
             try {
@@ -168,16 +158,5 @@ public class HttpResponse {
         responses.put(503, "Service Unavaliable");
         responses.put(504, "Gateway Timeout");
         responses.put(505, "HTTP Version Not Supported");
-    }
-
-    public void setupServerInfo() {
-        StringBuilder info = new StringBuilder();
-        info.append(HttpServer.getServerName());
-        info.append(" v");
-        info.append(HttpServer.getServerVersion());
-        info.append(" (");
-        info.append(HttpServer.getServerETC());
-        info.append(")");
-        serverInfo = info.toString();
     }
 }

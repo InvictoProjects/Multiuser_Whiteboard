@@ -1,16 +1,13 @@
 package com.invicto.server;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HttpServer extends HttpHandler implements Runnable {
+public class HttpServer implements Runnable {
 
-    public static final int DEFAULT_PORT = 9004;
+    public static final int DEFAULT_PORT = 9000;
     private final Logger logger = Logger.getLogger(HttpServer.class.getName());
 
     private final int port;
@@ -28,10 +25,9 @@ public class HttpServer extends HttpHandler implements Runnable {
     }
 
     public void run() {
-        try(ServerSocket serverSocket = new ServerSocket()) {
+        try (ServerSocket serverSocket = new ServerSocket()) {
             running = true;
             socket = serverSocket;
-
             logger.log(Level.INFO, () -> "Starting HttpServer at http://127.0.0.1:" + port);
 
             socket.setReuseAddress(true);
@@ -72,7 +68,6 @@ public class HttpServer extends HttpHandler implements Runnable {
 
     public void stop() {
         running = false;
-
         try {
             socket.close();
         } catch (IOException e) {
