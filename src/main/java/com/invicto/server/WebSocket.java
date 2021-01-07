@@ -38,13 +38,6 @@ public class WebSocket extends Thread {
                 code = strings[1];
             }
         }
-        /*while(true){
-            String text = read();
-            String[] strings = text.split(": ");
-            if(strings[0].equals("Sec-WebSocket-Key"))
-                code=strings[1];
-            if(text.equals(""))break;
-        }*/
         write("HTTP/1.1 101 Switching Protocols");
         write("Upgrade: websocket");
         write("Connection: Upgrade");
@@ -197,7 +190,6 @@ public class WebSocket extends Thread {
         public void run() {
             try {
                 while (true) {
-                    //operation-code 0x9 produces problems -> 0xA
                     ws.send(0xA, "Ping".getBytes());
                     Thread.sleep(10000);
                 }
