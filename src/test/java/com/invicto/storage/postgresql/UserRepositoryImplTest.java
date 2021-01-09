@@ -49,9 +49,9 @@ public class UserRepositoryImplTest {
     @Test
     public void update() {
         String statement1 = "UPDATE Users SET (login, room_id, user_type, write_permission, draw_permission) " +
-                "VALUES('NeVasyl', '13o23fh09ffwefSFJF', 'room_owner', TRUE, TRUE) WHERE id = 1";
+                "= ('NeVasyl', '13o23fh09ffwefSFJF', 'room_owner', TRUE, TRUE) WHERE id = 1";
         String statement2 = "UPDATE Users SET (login, room_id, user_type, write_permission, draw_permission) " +
-                "VALUES('Lev', '13o23fh09', 'room_owner', TRUE, TRUE) WHERE id = 2";
+                "= ('Lev', '13o23fh09', 'room_owner', TRUE, TRUE) WHERE id = 2";
         user1.setLogin("NeVasyl");
         userRepository.update(user1);
         verify(connector, times(1)).executeUpdate(statement1);
