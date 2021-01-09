@@ -8,12 +8,15 @@ import java.util.Random;
 public class CreateHandler implements HttpHandler {
 
     private final HttpRouter router;
-    public UserService userService;
-    public RoomService roomService;
+    private final UserService userService;
+    private final RoomService roomService;
     private String id;
+    private FileHandler fileHandler;
 
-    public CreateHandler(HttpRouter router) {
+    public CreateHandler(HttpRouter router, UserService userService, RoomService roomService) {
         this.router = router;
+        this.userService = userService;
+        this.roomService = roomService;
     }
 
     @Override
@@ -24,7 +27,8 @@ public class CreateHandler implements HttpHandler {
 
     private void createRoom() {
         id = generateRoomId();
-        router.addHandler("/" + id, new FileHandler("board.html"));
+        fileHandler = new FileHandler("board.html");
+        router.addHandler("/" + id, fileHandler);
         router.addHandler("/" + id + "/ws", new WebSocketHandler(userService, roomService, id, router));
     }
 
