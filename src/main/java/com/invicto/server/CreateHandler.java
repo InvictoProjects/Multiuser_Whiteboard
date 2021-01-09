@@ -11,7 +11,6 @@ public class CreateHandler implements HttpHandler {
     private final UserService userService;
     private final RoomService roomService;
     private String id;
-    private FileHandler fileHandler;
 
     public CreateHandler(HttpRouter router, UserService userService, RoomService roomService) {
         this.router = router;
@@ -27,7 +26,7 @@ public class CreateHandler implements HttpHandler {
 
     private void createRoom() {
         id = generateRoomId();
-        fileHandler = new FileHandler("board.html");
+        FileHandler fileHandler = new FileHandler("board.html");
         router.addHandler("/" + id, fileHandler);
         router.addHandler("/" + id + "/ws", new WebSocketHandler(userService, roomService, id, router));
     }
