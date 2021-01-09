@@ -8,17 +8,15 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebSocket extends Thread {
+    private final Logger logger = Logger.getLogger(WebSocket.class.getName());
     private Socket connection;
     private WsEventListener wsEventListener;
 
-    public final WebSocket accept(ServerSocket serverSocket, String request) throws Exception {
-        return accept(serverSocket.accept(), request);
-    }
-
-    public final WebSocket accept(Socket connection, String request) throws Exception {
+    public final WebSocket accept(Socket connection, String request) throws IOException, NoSuchAlgorithmException {
         this.connection = connection;
         String code="";
         String[] headers = request.split("\n");
@@ -33,7 +31,6 @@ public class WebSocket extends Thread {
         write("Connection: Upgrade");
         write("Sec-WebSocket-Accept: " + base64Enc(sha1(code + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")));
         write("");
-        new Ping(this).start();
         return this;
     }
 
@@ -43,20 +40,19 @@ public class WebSocket extends Thread {
             while (true){
                 onMessage(receive());
             }
-        }catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("WebSocket-Error: " + e);
+        } catch (Exception e) {
+            logger.info("WebSocket closed: " + e);
             onClose();
-        }finally {
+        } finally {
             try {
                 connection.close();
-            } catch (Exception e1) {
-                System.out.println("Websocket-Error: on close");
+            } catch (Exception ex) {
+                logger.log(Level.SEVERE, "WebsocketException on close:", ex);
             }
         }
     }
 
-    public void onOpen() throws Exception {
+    public void onOpen() {
         wsEventListener.onOpen();
     }
 
@@ -68,7 +64,7 @@ public class WebSocket extends Thread {
         wsEventListener.onClose();
     }
 
-    public void send(String msg) throws Exception {
+    public void send(String msg) throws IOException {
         send(1, msg.getBytes());
     }
 
@@ -89,16 +85,16 @@ public class WebSocket extends Thread {
         connection.getOutputStream().flush();
     }
 
-    public String receive() throws Exception {
+    public String receive() throws WebSocketException, IOException {
         byte[] data;
-        boolean istext=true;
+        boolean istext = true;
         do {
             //header
             byte[] header = new byte[2];
             int end = connection.getInputStream().read(header, 0, 2);
             int opcode = header[0] & 0x0F;
             if (opcode == 8 || end == -1) {
-                throw new Exception("Connection closed");
+                throw new WebSocketException("Connection closed");
             }
             if (opcode != 1)
                 istext = false;
@@ -114,7 +110,7 @@ public class WebSocket extends Thread {
                 connection.getInputStream().read(extdatasize, 0, 2);
                 if (extdatasize[0] != 0 || extdatasize[1] != 0 || extdatasize[2] != 0 ||
                         extdatasize[3] != 0 || (extdatasize[4] & 0x80) != 0)
-                    throw new Exception("recv too big data-frame");
+                    throw new WebSocketException("recv too big data-frame");
                 datasize = (extdatasize[4] << 24) + (extdatasize[5] << 16) +
                         (extdatasize[6] << 8) + (extdatasize[7] & 0xFF);
             }
@@ -134,14 +130,15 @@ public class WebSocket extends Thread {
                 for (int i = 0; i < datasize; i++)
                     data[i] = (byte) (data[i] ^ mask[i % 4]);
             }
-            if (opcode==0x9) {
+            if (opcode == 0x9) {
                 send(0xA, data);
             }
-            if (opcode!=0x1) {
-                System.out.println("No-Text-msg: opcode: "+opcode+"; data: "+ utf8ToString(data));
+            if (opcode != 0x1) {
+                String noTextMsg = "No-Text-msg: opcode: " + opcode + "; data: " + utf8ToString(data);
+                logger.info(noTextMsg);
             }
-            if (opcode==0x0) {
-                throw new Exception("Continuation frames aren't supported :" + utf8ToString(data) + ".");
+            if (opcode == 0x0) {
+                throw new WebSocketException("Continuation frames aren't supported :" + utf8ToString(data) + ".");
             }
         } while (!istext);
         return utf8ToString(data);
@@ -153,7 +150,7 @@ public class WebSocket extends Thread {
             byte[] proret = new byte[1];
             int end = connection.getInputStream().read(proret,0,1);
             if(end == -1 || proret[0] == 10)break;
-            if(proret[0]!=13)
+            if(proret[0] != 13)
                 ret.append((char) proret[0]);
         }
         return ret.toString();
@@ -169,26 +166,6 @@ public class WebSocket extends Thread {
         this.wsEventListener = wsEventListener;
     }
 
-    static class Ping extends Thread {
-        private final WebSocket ws;
-
-        public Ping(WebSocket ws){
-            this.ws = ws;
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (true) {
-                    ws.send(0xA, "Ping".getBytes());
-                    Thread.sleep(10000);
-                }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private String utf8ToString(byte[] a) {
         return new String(a, StandardCharsets.UTF_8);
     }
@@ -200,5 +177,13 @@ public class WebSocket extends Thread {
     private byte[] sha1(String input) throws NoSuchAlgorithmException {
         MessageDigest mDigest = MessageDigest.getInstance("SHA1");
         return mDigest.digest(input.getBytes());
+    }
+
+    public void close() {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "SocketException: ", e);
+        }
     }
 }
