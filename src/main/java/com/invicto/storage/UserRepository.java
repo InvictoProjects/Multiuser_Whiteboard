@@ -7,6 +7,6 @@ public interface UserRepository {
     void save(User user);
     void update(User editedUser);
     void delete(User user);
-    User findById(int id);
-    boolean existsById(int id);
+    User findById(Integer id);
+    boolean existsById(Integer id);
 }

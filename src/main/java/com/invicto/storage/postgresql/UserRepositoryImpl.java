@@ -17,10 +17,18 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void save(User user) {
-        String statement = "INSERT INTO Users(login, room_id, user_type, write_permission, draw_permission) " +
-                "VALUES('" + user.getLogin() + "', '" + user.getRoomId() + "', '" + user.getUserType().toString() +
-                "', " + String.valueOf(user.isWritePermission()).toUpperCase() + ", " + String.valueOf(user.isDrawPermission()).toUpperCase() + ")"+
-                " RETURNING id";
+        String statement;
+        if (user.getRoomId() == null) {
+            statement = "INSERT INTO Users(login, user_type, write_permission, draw_permission) " +
+                    "VALUES('" + user.getLogin() + "', '" + user.getUserType().toString() +
+                    "', " + String.valueOf(user.isWritePermission()).toUpperCase() + ", " + String.valueOf(user.isDrawPermission()).toUpperCase() + ")" +
+                    " RETURNING id";
+        } else {
+            statement = "INSERT INTO Users(login, room_id, user_type, write_permission, draw_permission) " +
+                    "VALUES('" + user.getLogin() + "', '" + user.getRoomId() + "', '" + user.getUserType().toString() +
+                    "', " + String.valueOf(user.isWritePermission()).toUpperCase() + ", " + String.valueOf(user.isDrawPermission()).toUpperCase() + ")" +
+                    " RETURNING id";
+        }
         ResultSet result = connector.executeQuery(statement);
         try {
             if (result.next()) {
@@ -35,7 +43,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void update(User editedUser) {
         String statement = "UPDATE Users SET (login, room_id, user_type, write_permission, draw_permission) " +
-                "VALUES('" + editedUser.getLogin() + "', '" + editedUser.getRoomId() + "', '" + editedUser.getUserType().toString() +
+                "= ('" + editedUser.getLogin() + "', '" + editedUser.getRoomId() + "', '" + editedUser.getUserType().toString() +
                 "', " + String.valueOf(editedUser.isWritePermission()).toUpperCase() + ", " + String.valueOf(editedUser.isDrawPermission()).toUpperCase() + ")" +
                 " WHERE id = " + editedUser.getId();
         connector.executeUpdate(statement);
@@ -48,7 +56,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findById(int id) {
+    public User findById(Integer id) {
         String statement = "SELECT * FROM Users WHERE id = " + id;
         ResultSet result = connector.executeQuery(statement);
         if (result == null) {
@@ -75,7 +83,10 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public boolean existsById(int id) {
+    public boolean existsById(Integer id) {
+        if (id == null) {
+            return false;
+        }
         String statement = "SELECT * FROM Users WHERE id = " + id;
         ResultSet result = connector.executeQuery(statement);
         try {

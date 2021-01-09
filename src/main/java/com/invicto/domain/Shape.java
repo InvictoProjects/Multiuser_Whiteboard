@@ -2,24 +2,36 @@ package com.invicto.domain;
 
 public class Shape {
 
-    private String color;
+    private String roomId;
+    private String path;
     private int thickness;
     private boolean dotted;
     private boolean filled;
+    private String color;
 
-    public Shape(String color, int thickness, boolean dotted, boolean filled) {
-        this.color = color;
+    public Shape(String roomId, String path, int thickness, boolean dotted, boolean filled, String color) {
+        this.roomId = roomId;
+        this.path = path;
         this.thickness = thickness;
         this.dotted = dotted;
         this.filled = filled;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public int getThickness() {
@@ -44,5 +56,13 @@ public class Shape {
 
     public void setFilled(boolean filled) {
         this.filled = filled;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }
