@@ -1,6 +1,5 @@
 package com.invicto.server.handlers;
 
-import com.invicto.server.handlers.HttpHandler;
 import com.invicto.server.HttpRequest;
 import com.invicto.server.HttpResponse;
 

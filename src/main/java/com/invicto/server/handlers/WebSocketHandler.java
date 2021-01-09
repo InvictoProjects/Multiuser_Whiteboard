@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class WebSocketHandler implements HttpHandler {
 
@@ -121,18 +122,28 @@ public class WebSocketHandler implements HttpHandler {
                 @Override
                 public void onClose() {
                     User user = users.get(webSocket);
-                    roomService.deleteUser(user.getId(), roomId);
-                    webSockets.remove(user);
-                    users.remove(webSocket);
-                    try {
-                        roomService.delete(user, roomId);
-                        for (WebSocket ws : users.keySet()) {
-                            ws.close();
-                            router.deleteHandler("/" + roomId);
-                            router.deleteHandler("/" + roomId + "/ws");
+                    CompletableFuture<Void> future1 = CompletableFuture.runAsync(() -> {
+                        roomService.deleteUser(user.getId(), roomId);
+                        webSockets.remove(user);
+                        users.remove(webSocket);
+                    });
+                    CompletableFuture<Void> future2 = CompletableFuture.runAsync(() -> {
+                        try {
+                            roomService.delete(user, roomId);
+                            for (WebSocket ws : users.keySet()) {
+                                ws.close();
+                                router.deleteHandler("/" + roomId);
+                                router.deleteHandler("/" + roomId + "/ws");
+                            }
+                        } catch (PermissionException e) {
+                            userService.delete(user);
                         }
-                    } catch (PermissionException e) {
-                        userService.delete(user);
+                    });
+                    try {
+                        CompletableFuture<Void> combineFuture = CompletableFuture.allOf(future1, future2);
+                        combineFuture.get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             });
