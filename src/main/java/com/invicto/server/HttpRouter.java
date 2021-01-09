@@ -1,12 +1,16 @@
 package com.invicto.server;
 
+import com.invicto.server.handlers.ErrorHandler;
+import com.invicto.server.handlers.FileHandler;
+import com.invicto.server.handlers.HttpHandler;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRouter {
     private final Map<String, HttpHandler> handlers;
-    private HttpHandler errorHandler;
-    private HttpHandler defaultHandler;
+    private final HttpHandler errorHandler;
+    private final HttpHandler defaultHandler;
 
     public HttpRouter() {
         handlers = new HashMap<>();

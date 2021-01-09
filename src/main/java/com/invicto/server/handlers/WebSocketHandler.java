@@ -1,15 +1,22 @@
-package com.invicto.server;
+package com.invicto.server.handlers;
 
 import com.invicto.domain.*;
 import com.invicto.exceptions.PermissionException;
+import com.invicto.server.HttpRequest;
+import com.invicto.server.HttpResponse;
+import com.invicto.server.HttpRouter;
+import com.invicto.server.websocket.WebSocket;
+import com.invicto.server.websocket.WsEventListener;
 import com.invicto.services.RoomService;
 import com.invicto.services.UserService;
 
 import java.io.IOException;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 public class WebSocketHandler implements HttpHandler {
 

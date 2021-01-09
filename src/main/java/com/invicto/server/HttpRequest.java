@@ -1,6 +1,9 @@
 package com.invicto.server;
 
+import com.invicto.exceptions.HttpException;
 import com.invicto.exceptions.PermissionException;
+import com.invicto.server.handlers.ErrorHandler;
+import com.invicto.server.handlers.HttpHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
