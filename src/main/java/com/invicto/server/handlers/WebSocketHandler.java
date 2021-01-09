@@ -187,6 +187,11 @@ public class WebSocketHandler implements HttpHandler {
                 }
             }
         });
+        try {
+            future.get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void doClose(WebSocket webSocket) {
