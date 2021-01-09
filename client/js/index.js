@@ -12,4 +12,3 @@ function joinRoom() {
     const roomId = document.getElementById('roomId').value;
     window.location.href += roomId;
 }
-t();
