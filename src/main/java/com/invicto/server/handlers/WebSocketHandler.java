@@ -45,20 +45,38 @@ public class WebSocketHandler implements HttpHandler {
                     User user;
                     if (roomService.existsById(roomId)) {
                         user = addUserToRoom();
-                        Room room = roomService.findById(roomId);
-                        StringBuilder data = new StringBuilder();
-                        for (Shape shape : room.getShapes()) {
-                            data.append(shape.getPath()).append("\n");
+                        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> roomService.findById(roomId))
+                                .thenApply(room -> {
+                                    StringBuilder data = new StringBuilder();
+                                    for (Shape shape : room.getShapes()) {
+                                        data.append(shape.getPath()).append("\n");
+                                    }
+                                    try {
+                                        webSocket.send("drawn shapes\n"+data);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    return room;
+                                })
+                                .thenAcceptAsync(room -> {
+                                    StringBuilder data = new StringBuilder();
+                                    for (Message message : room.getMessages()) {
+                                        String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
+                                                "\"text\": \"" + message.getText() + "\", " +
+                                                "\"time\": \"" + message.getTime().toString() + "\" }";
+                                        data.append(obj).append("\n");
+                                        try {
+                                            webSocket.send("sent messages\n"+data);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                        try {
+                            future.get();
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
                         }
-                        StringBuilder data1 = new StringBuilder();
-                        for (Message message : room.getMessages()) {
-                            String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
-                                    "\"text\": \"" + message.getText() + "\", " +
-                                    "\"time\": \"" + message.getTime().toString() + "\" }";
-                            data1.append(obj).append("\n");
-                        }
-                        CompletableFuture.runAsync(wrap(webSocket, "drawn shapes\n" + data)).thenRunAsync(wrap(webSocket, "sent messages\n" + data1));
-                        //CompletableFuture.runAsync(wrap(webSocket, "sent messages\n" + data1));
                     } else {
                         user = createRoomAndOwner();
                     }
@@ -69,52 +87,78 @@ public class WebSocketHandler implements HttpHandler {
                 @Override
                 public void onMessage(String data) {
                     if (data.startsWith("login=")) {
-                        String login = data.substring(data.indexOf('=') + 1);
-                        User user = users.get(webSocket);
-                        try {
-                            userService.updateLogin(user, login);
-                        } catch (PermissionException e) {
+                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                            String login = data.substring(data.indexOf('=') + 1);
+                            User user = users.get(webSocket);
                             try {
-                                webSocket.send("Permission denied");
-                            } catch (Exception exception) {
-                                exception.printStackTrace();
+                                userService.updateLogin(user, login);
+                            } catch (PermissionException e) {
+                                try {
+                                    webSocket.send("Permission denied");
+                                } catch (Exception exception) {
+                                    exception.printStackTrace();
+                                }
                             }
+                        });
+                        try {
+                            future.get();
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
                         }
                     } else if (data.startsWith("message=")) {
-                        String messageText = data.substring(data.indexOf('=') + 1);
-                        LocalTime time = LocalTime.now();
-                        User caller = users.get(webSocket);
-                        Message message = new Message(null, roomId, caller, time, messageText);
-                        try {
-                            roomService.addMessage(caller, roomId, message);
-                        } catch (PermissionException e) {
-                            e.printStackTrace();
-                        }
-                        for (WebSocket ws : users.keySet()) {
+                        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+                            String messageText = data.substring(data.indexOf('=') + 1);
+                            LocalTime time = LocalTime.now();
+                            User caller = users.get(webSocket);
+                            Message message = new Message(null, roomId, caller, time, messageText);
                             try {
-                                String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
-                                        "\"text\": \"" + message.getText() + "\", " +
-                                        "\"time\": \"" + message.getTime().withNano(0).toString() + "\" }";
-                                ws.send("message" + obj);
-                            } catch (Exception e) {
+                                roomService.addMessage(caller, roomId, message);
+                            } catch (PermissionException e) {
                                 e.printStackTrace();
                             }
-                        }
-                    } else {
-                        try {
-                            Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
-                            roomService.addShape(users.get(webSocket), roomId, shape);
-                        } catch (PermissionException e) {
-                            e.printStackTrace();
-                        }
-                        for (WebSocket ws : users.keySet()) {
-                            try {
-                                if (!ws.equals(webSocket)) {
-                                    ws.send(data);
+                            return message;
+                        }).thenAccept(message -> {
+                            for (WebSocket ws : users.keySet()) {
+                                try {
+                                    String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
+                                            "\"text\": \"" + message.getText() + "\", " +
+                                            "\"time\": \"" + message.getTime().withNano(0).toString() + "\" }";
+                                    ws.send("message" + obj);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (Exception e) {
+                            }
+                        });
+
+                    } else {
+                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                            try {
+                                Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
+                                roomService.addShape(users.get(webSocket), roomId, shape);
+                            } catch (PermissionException e) {
                                 e.printStackTrace();
                             }
+                        }).thenRun(() -> {
+                            try {
+                                Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
+                                roomService.addShape(users.get(webSocket), roomId, shape);
+                            } catch (PermissionException e) {
+                                e.printStackTrace();
+                            }
+                            for (WebSocket ws : users.keySet()) {
+                                try {
+                                    if (!ws.equals(webSocket)) {
+                                        ws.send(data);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        try {
+                            future.get();
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -177,15 +221,5 @@ public class WebSocketHandler implements HttpHandler {
         userService.save(user);
         roomService.addUser(user, roomId);
         return user;
-    }
-
-    private Runnable wrap(WebSocket webSocket, String data) {
-        return () -> {
-            try {
-                webSocket.send(data);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
     }
 }
