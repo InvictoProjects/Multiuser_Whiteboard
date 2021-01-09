@@ -1,8 +1,11 @@
 package com.invicto.server;
 
+import com.invicto.exceptions.PermissionException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +53,7 @@ public class HttpRequest implements Runnable {
             } else {
                 determineHandler().handle(this, null);
             }
-        } catch (IOException | HttpException e) {
+        } catch (IOException | HttpException | PermissionException e) {
             e.printStackTrace();
         }
     }
@@ -62,7 +65,7 @@ public class HttpRequest implements Runnable {
                 "\n\t\t" + "Request Path " + fullPath;
     }
 
-    public HttpResponse createResponse() throws IOException, HttpException {
+    public HttpResponse createResponse() throws IOException, HttpException, PermissionException {
         HttpResponse response = new HttpResponse(this);
         determineHandler().handle(this,  response);
         return response;
@@ -108,7 +111,7 @@ public class HttpRequest implements Runnable {
         stringRequest = requestBuilder.toString();
     }
 
-    private Map<String, String> parseInputData(String[] data) {
+    private Map<String, String> parseInputData(String[] data) throws UnsupportedEncodingException {
         Map<String, String> out = new HashMap<>();
         for (String item : data) {
             if (!item.contains("=")) {
@@ -116,7 +119,7 @@ public class HttpRequest implements Runnable {
                 continue;
             }
             String value = item.substring(item.indexOf('=') + 1);
-            value = URLDecoder.decode(value, StandardCharsets.UTF_8);
+            value = URLDecoder.decode(value, String.valueOf(StandardCharsets.UTF_8));
             out.put(item.substring(0, item.indexOf('=')), value);
         }
         return out;
@@ -126,15 +129,14 @@ public class HttpRequest implements Runnable {
         if (router == null) {
             return new ErrorHandler();
         }
-        //String sPath = splitPath.isEmpty() ? "" : splitPath.get(splitPath.size()-1);
-        return router.route(path); // was sPath, this
+        return router.route(path);
     }
 
     public boolean isType(String requestTypeCheck) {
         return requestType.equalsIgnoreCase(requestTypeCheck);
     }
 
-    public void setRequestLine(String line) throws HttpException {
+    public void setRequestLine(String line) throws HttpException, UnsupportedEncodingException {
         this.requestLine = line;
         String[] splitter = requestLine.trim().split(" ");
         if (splitter.length != 3) {
@@ -144,21 +146,13 @@ public class HttpRequest implements Runnable {
         setFullPath(splitter[1]);
     }
 
-    public void setFullPath(String inPath) {
+    public void setFullPath(String inPath) throws UnsupportedEncodingException {
         this.fullPath = inPath;
         path = inPath;
         setSplitPath(inPath);
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setSplitPath(String fullPath) {
+    public void setSplitPath(String fullPath) throws UnsupportedEncodingException {
         for (String segment : fullPath.substring(1).split("/")) {
             if (segment.isEmpty()) {
                 continue;
@@ -176,27 +170,12 @@ public class HttpRequest implements Runnable {
         }
     }
 
-    public List<String> getSplitPath() {
-        return splitPath;
-    }
-
     public Socket getConnection() {
         return connection;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public void setHttpRequest(String httpRequest) {
-        this.stringRequest = httpRequest;
     }
 
     public String getHttpRequest() {
         return stringRequest;
     }
-
-    public String getRequestType() {
-        return requestType;
-    }
 }
+
