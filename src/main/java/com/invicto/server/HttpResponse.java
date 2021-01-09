@@ -10,10 +10,6 @@ import java.util.logging.Logger;
 
 public class HttpResponse {
 
-    public static final String EXCEPTION_ERROR = "an exception occurred while processing your request";
-    public static final String NOT_A_METHOD_ERROR = "No known method";
-    public static final String MALFORMED_INPUT_ERROR = "Malformed Input";
-    public static final String STATUS_GOOD = "All systems are go";
     private static final Logger logger = Logger.getLogger(HttpResponse.class.getName());
     private static Map<Integer, String> responses;
     private final HttpRequest request;
@@ -40,11 +36,6 @@ public class HttpResponse {
         this.code = 204;
         setBody("");
         mimeType = "";
-    }
-
-    public void error(int code, String message, Throwable t) {
-        t.printStackTrace();
-        message(code, message, mimeType);
     }
 
     public void respond() {
@@ -90,10 +81,6 @@ public class HttpResponse {
 
     protected void writeLine(String line) throws IOException {
         writer.writeBytes(line + "\n");
-    }
-
-    public byte[] getBody() {
-        return body;
     }
 
     public void setBody(String body) {
