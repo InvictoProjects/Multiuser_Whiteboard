@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class HttpServer implements Runnable {
 
-    public static final int DEFAULT_PORT = 9000;
+    public static final int DEFAULT_PORT = 80;
     private final Logger logger = Logger.getLogger(HttpServer.class.getName());
 
     private final int port;
@@ -58,20 +58,7 @@ public class HttpServer implements Runnable {
         }
     }
 
-    public void setRouter(HttpRouter router) {
-        this.router = router;
-    }
-
     public HttpRouter getRouter() {
         return this.router;
-    }
-
-    public void stop() {
-        running = false;
-        try {
-            socket.close();
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "Error closing socket", e);
-        }
     }
 }

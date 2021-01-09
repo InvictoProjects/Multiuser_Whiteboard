@@ -113,7 +113,20 @@ public class WebSocketHandler implements HttpHandler {
 
                 @Override
                 public void onClose() {
-                    webSockets.remove(webSocket);
+                    User user = users.get(webSocket);
+                    roomService.deleteUser(user.getId(), roomId);
+                    webSockets.remove(user);
+                    users.remove(webSocket);
+                    try {
+                        roomService.delete(user, roomId);
+                        for (WebSocket ws : users.keySet()) {
+                            ws.close();
+                            router.deleteHandler("/" + roomId);
+                            router.deleteHandler("/" + roomId + "/ws");
+                        }
+                    } catch (PermissionException e) {
+                        userService.delete(user);
+                    }
                 }
             });
             webSocket.accept(request.getConnection(), request.getHttpRequest());
@@ -152,10 +165,9 @@ public class WebSocketHandler implements HttpHandler {
         return () -> {
             try {
                 webSocket.send(data);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         };
     }
 }
-

@@ -13,16 +13,13 @@ public class HttpRouter {
         errorHandler = new ErrorHandler(501);
         defaultHandler = null;
         addHandler("/", new FileHandler("index.html"));
-        addHandler("/create", new CreateHandler(this));
-        addHandler("/css/index.css", new FileHandler("css/index.css"));
         addHandler("/js/index.js", new FileHandler("js/index.js"));
         addHandler("/js/board.js", new FileHandler("js/board.js"));
+        addHandler("/css/board.css", new FileHandler("css/board.css"));
     }
 
     public HttpHandler route(String pathSegment) {
         if (handlers.containsKey(pathSegment)) {
-            //String requestPath = request.getPath();
-            //request.setPath(requestPath.substring(pathSegment.length() + 1));
             return handlers.get(pathSegment);
         } else if (defaultHandler != null) {
             return defaultHandler;
@@ -34,19 +31,7 @@ public class HttpRouter {
         handlers.put(pathSegment, handler);
     }
 
-    public HttpHandler getErrorHandler() {
-        return errorHandler;
-    }
-
-    public void setErrorHandler(HttpHandler errorHandler) {
-        this.errorHandler = errorHandler;
-    }
-
-    public HttpHandler getDefaultHandler() {
-        return defaultHandler;
-    }
-
-    public void setDefaultHandler(HttpHandler defaultHandler) {
-        this.defaultHandler = defaultHandler;
+    public void deleteHandler(String pathSegment) {
+        handlers.remove(pathSegment);
     }
 }
