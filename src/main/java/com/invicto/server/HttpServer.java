@@ -1,5 +1,7 @@
 package com.invicto.server;
 
+import com.invicto.server.handlers.WebSocketHandler;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;

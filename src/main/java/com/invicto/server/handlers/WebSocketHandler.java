@@ -20,7 +20,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class WebSocketHandler implements HttpHandler {
-
     private final Map<WebSocket, User> users = new HashMap<>();
     private final Map<User, WebSocket> webSockets = new HashMap<>();
     private final UserService userService;
@@ -77,7 +76,7 @@ public class WebSocketHandler implements HttpHandler {
     }
 
     private void doOpen(WebSocket webSocket) {
-        CompletableFuture.supplyAsync(() -> roomService.findById(roomId))
+        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> roomService.findById(roomId))
                 .thenApply(room -> {
                     StringBuilder data = new StringBuilder();
                     for (Shape shape : room.getShapes()) {
@@ -104,6 +103,11 @@ public class WebSocketHandler implements HttpHandler {
                         }
                     }
                 });
+        try {
+            future.get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void changeLogin(WebSocket webSocket, String data) {
