@@ -61,5 +61,4 @@ public class HttpServer implements Runnable {
     public HttpRouter getRouter() {
         return this.router;
     }
-
 }
