@@ -45,38 +45,7 @@ public class WebSocketHandler implements HttpHandler {
                     User user;
                     if (roomService.existsById(roomId)) {
                         user = addUserToRoom();
-                        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> roomService.findById(roomId))
-                                .thenApply(room -> {
-                                    StringBuilder data = new StringBuilder();
-                                    for (Shape shape : room.getShapes()) {
-                                        data.append(shape.getPath()).append("\n");
-                                    }
-                                    try {
-                                        webSocket.send("drawn shapes\n"+data);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    return room;
-                                })
-                                .thenAcceptAsync(room -> {
-                                    StringBuilder data = new StringBuilder();
-                                    for (Message message : room.getMessages()) {
-                                        String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
-                                                "\"text\": \"" + message.getText() + "\", " +
-                                                "\"time\": \"" + message.getTime().toString() + "\" }";
-                                        data.append(obj).append("\n");
-                                        try {
-                                            webSocket.send("sent messages\n"+data);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                });
-                        try {
-                            future.get();
-                        } catch (ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        doOpen(webSocket);
                     } else {
                         user = createRoomAndOwner();
                     }
@@ -87,108 +56,17 @@ public class WebSocketHandler implements HttpHandler {
                 @Override
                 public void onMessage(String data) {
                     if (data.startsWith("login=")) {
-                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                            String login = data.substring(data.indexOf('=') + 1);
-                            User user = users.get(webSocket);
-                            try {
-                                userService.updateLogin(user, login);
-                            } catch (PermissionException e) {
-                                try {
-                                    webSocket.send("Permission denied");
-                                } catch (Exception exception) {
-                                    exception.printStackTrace();
-                                }
-                            }
-                        });
-                        try {
-                            future.get();
-                        } catch (ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        changeLogin(webSocket, data);
                     } else if (data.startsWith("message=")) {
-                        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
-                            String messageText = data.substring(data.indexOf('=') + 1);
-                            LocalTime time = LocalTime.now();
-                            User caller = users.get(webSocket);
-                            Message message = new Message(null, roomId, caller, time, messageText);
-                            try {
-                                roomService.addMessage(caller, roomId, message);
-                            } catch (PermissionException e) {
-                                e.printStackTrace();
-                            }
-                            return message;
-                        }).thenAccept(message -> {
-                            for (WebSocket ws : users.keySet()) {
-                                try {
-                                    String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
-                                            "\"text\": \"" + message.getText() + "\", " +
-                                            "\"time\": \"" + message.getTime().withNano(0).toString() + "\" }";
-                                    ws.send("message" + obj);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-
+                        sendMessage(webSocket, data);
                     } else {
-                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                            try {
-                                Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
-                                roomService.addShape(users.get(webSocket), roomId, shape);
-                            } catch (PermissionException e) {
-                                e.printStackTrace();
-                            }
-                        }).thenRun(() -> {
-                            try {
-                                Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
-                                roomService.addShape(users.get(webSocket), roomId, shape);
-                            } catch (PermissionException e) {
-                                e.printStackTrace();
-                            }
-                            for (WebSocket ws : users.keySet()) {
-                                try {
-                                    if (!ws.equals(webSocket)) {
-                                        ws.send(data);
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                        try {
-                            future.get();
-                        } catch (ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        sendShape(webSocket, data);
                     }
                 }
 
                 @Override
                 public void onClose() {
-                    User user = users.get(webSocket);
-                    CompletableFuture<Void> future1 = CompletableFuture.runAsync(() -> {
-                        roomService.deleteUser(user.getId(), roomId);
-                        webSockets.remove(user);
-                        users.remove(webSocket);
-                    });
-                    CompletableFuture<Void> future2 = CompletableFuture.runAsync(() -> {
-                        try {
-                            roomService.delete(user, roomId);
-                            for (WebSocket ws : users.keySet()) {
-                                ws.close();
-                                router.deleteHandler("/" + roomId);
-                                router.deleteHandler("/" + roomId + "/ws");
-                            }
-                        } catch (PermissionException e) {
-                            userService.delete(user);
-                        }
-                    });
-                    try {
-                        CompletableFuture<Void> combineFuture = CompletableFuture.allOf(future1, future2);
-                        combineFuture.get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    doClose(webSocket);
                 }
             });
             webSocket.accept(request.getConnection(), request.getHttpRequest());
@@ -196,6 +74,143 @@ public class WebSocketHandler implements HttpHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void doOpen(WebSocket webSocket) {
+        CompletableFuture.supplyAsync(() -> roomService.findById(roomId))
+                .thenApply(room -> {
+                    StringBuilder data = new StringBuilder();
+                    for (Shape shape : room.getShapes()) {
+                        data.append(shape.getPath()).append("\n");
+                    }
+                    try {
+                        webSocket.send("drawn shapes\n" + data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return room;
+                })
+                .thenAcceptAsync(room -> {
+                    StringBuilder data = new StringBuilder();
+                    for (Message message : room.getMessages()) {
+                        String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
+                                "\"text\": \"" + message.getText() + "\", " +
+                                "\"time\": \"" + message.getTime().toString() + "\" }";
+                        data.append(obj).append("\n");
+                        try {
+                            webSocket.send("sent messages\n" + data);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    private void changeLogin(WebSocket webSocket, String data) {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            String login = data.substring(data.indexOf('=') + 1);
+            User user = users.get(webSocket);
+            try {
+                userService.updateLogin(user, login);
+            } catch (PermissionException e) {
+                try {
+                    webSocket.send("Permission denied");
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
+        try {
+            future.get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessage(WebSocket webSocket, String data) {
+        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+            String messageText = data.substring(data.indexOf('=') + 1);
+            LocalTime time = LocalTime.now();
+            User caller = users.get(webSocket);
+            Message message = new Message(null, roomId, caller, time, messageText);
+            try {
+                roomService.addMessage(caller, roomId, message);
+            } catch (PermissionException e) {
+                e.printStackTrace();
+            }
+            return message;
+        }).thenAccept(message -> {
+            for (WebSocket ws : users.keySet()) {
+                try {
+                    String obj = "{ " + "\"sender\": \"" + message.getSender().getLogin() + "\", " +
+                            "\"text\": \"" + message.getText() + "\", " +
+                            "\"time\": \"" + message.getTime().withNano(0).toString() + "\" }";
+                    ws.send("message" + obj);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        try {
+            future.get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendShape(WebSocket webSocket, String data) {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            try {
+                Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
+                roomService.addShape(users.get(webSocket), roomId, shape);
+            } catch (PermissionException e) {
+                e.printStackTrace();
+            }
+        }).thenRun(() -> {
+            try {
+                Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
+                roomService.addShape(users.get(webSocket), roomId, shape);
+            } catch (PermissionException e) {
+                e.printStackTrace();
+            }
+            for (WebSocket ws : users.keySet()) {
+                try {
+                    if (!ws.equals(webSocket)) {
+                        ws.send(data);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void doClose(WebSocket webSocket) {
+        User user = users.get(webSocket);
+        CompletableFuture<Void> future1 = CompletableFuture.runAsync(() -> {
+            roomService.deleteUser(user.getId(), roomId);
+            webSockets.remove(user);
+            users.remove(webSocket);
+        });
+        CompletableFuture<Void> future2 = CompletableFuture.runAsync(() -> {
+            try {
+                roomService.delete(user, roomId);
+                for (WebSocket ws : users.keySet()) {
+                    ws.close();
+                    router.deleteHandler("/" + roomId);
+                    router.deleteHandler("/" + roomId + "/ws");
+                }
+            } catch (PermissionException e) {
+                userService.delete(user);
+            }
+        });
+        try {
+            CompletableFuture<Void> combineFuture = CompletableFuture.allOf(future1, future2);
+            combineFuture.get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private User createRoomAndOwner() {
