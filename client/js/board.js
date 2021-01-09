@@ -63,6 +63,69 @@ window.addEventListener("load", () => {
     }
 
     setup();
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight * 0.98;
+    canvas.width = window.innerWidth * 0.70;
+
+    let painting = false;
+    let pointArray;
+
+    function startPosition() {
+        painting = true;
+        pointArray = [];
+    }
+
+    function finishedPosition() {
+        painting = false;
+        if (pointArray.length > 0) {
+            webSocket.send('path(\'' + pointArray.toString() + '\')');
+        }
+        ctx.beginPath();
+        pointArray = [];
+    }
+
+    function draw(e) {
+        if(!painting) return;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+
+        let pos = getMousePos(canvas, e);
+        let x = pos.x;
+        let y = pos.y;
+        pointArray.push(x, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    function getMousePos(canvas1, e) {
+        let rect = canvas1.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+
+    function drawShape(arr) {
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(arr[0], arr[1]);
+        for (let i = 2; i < arr.length; i += 2) {
+            const x = arr[i];
+            const y = arr[i + 1];
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    canvas.addEventListener('mousedown', startPosition);
+    canvas.addEventListener('mouseup', finishedPosition);
+    canvas.addEventListener('mousemove', draw);
 });
 
 function sendLogin() {
