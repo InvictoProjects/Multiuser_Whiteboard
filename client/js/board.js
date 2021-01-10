@@ -40,7 +40,6 @@ window.addEventListener("load", () => {
         const pointsArr = points.substring(2, points.length - 2).split(',');
         drawShape(pointsArr);
         ctx.beginPath();
-        return data;
     }
 
     function showMessage(data) {

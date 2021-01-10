@@ -76,7 +76,7 @@ public class WebSocketHandler implements HttpHandler {
     }
 
     private void doOpen(WebSocket webSocket) {
-        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> roomService.findById(roomId))
+        CompletableFuture.supplyAsync(() -> roomService.findById(roomId))
                 .thenApply(room -> {
                     StringBuilder data = new StringBuilder();
                     for (Shape shape : room.getShapes()) {
@@ -103,15 +103,10 @@ public class WebSocketHandler implements HttpHandler {
                         }
                     }
                 });
-        try {
-            future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void changeLogin(WebSocket webSocket, String data) {
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             String login = data.substring(data.indexOf('=') + 1);
             User user = users.get(webSocket);
             try {
@@ -124,15 +119,10 @@ public class WebSocketHandler implements HttpHandler {
                 }
             }
         });
-        try {
-            future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void sendMessage(WebSocket webSocket, String data) {
-        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture.supplyAsync(() -> {
             String messageText = data.substring(data.indexOf('=') + 1);
             LocalTime time = LocalTime.now();
             User caller = users.get(webSocket);
@@ -155,15 +145,10 @@ public class WebSocketHandler implements HttpHandler {
                 }
             }
         });
-        try {
-            future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void sendShape(WebSocket webSocket, String data) {
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             try {
                 Shape shape = new Shape(roomId, data, 3, false, false, "#000000");
                 roomService.addShape(users.get(webSocket), roomId, shape);
@@ -187,11 +172,6 @@ public class WebSocketHandler implements HttpHandler {
                 }
             }
         });
-        try {
-            future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void doClose(WebSocket webSocket) {
