@@ -193,13 +193,7 @@ public class WebSocketHandler implements HttpHandler {
                 userService.delete(user);
             }
         });
-        try {
-            CompletableFuture<Void> combineFuture = CompletableFuture.allOf(future1, future2);
-            combineFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        CompletableFuture.allOf(future1, future2);
     }
 
     private User createRoomAndOwner() {
