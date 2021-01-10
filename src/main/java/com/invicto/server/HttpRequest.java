@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 public class HttpRequest implements Runnable {
@@ -72,12 +71,7 @@ public class HttpRequest implements Runnable {
 
     public HttpResponse createResponse() throws IOException, HttpException, PermissionException {
         HttpResponse response = new HttpResponse(this);
-        try {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> determineHandler().handle(this,  response));
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        CompletableFuture.runAsync(() -> determineHandler().handle(this, response));
         return response;
     }
 
@@ -111,7 +105,7 @@ public class HttpRequest implements Runnable {
             int contentLength = Integer.parseInt(headers.get("Content-Length"));
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < contentLength; i++) {
-                stringBuilder.append((char)input.read());
+                stringBuilder.append((char) input.read());
             }
             requestBuilder.append(stringBuilder.toString());
             String requestBody = stringBuilder.toString();
