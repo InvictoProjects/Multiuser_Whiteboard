@@ -97,17 +97,30 @@ public class WebSocket extends Thread {
     }
 
     private void parseFrame() throws WebSocketException, IOException {
-        //header
         byte[] header = new byte[2];
         int end = connection.getInputStream().read(header, 0, 2);
         int opcode = header[0] & 0x0F;
         if (opcode == 8 || end == -1) {
             throw new WebSocketException("Connection closed");
         }
-        if (opcode != 1)
+        if (opcode != 1) {
             isText = false;
+        }
+        int dataSize = getDataSize(header);
+        parseData(header, dataSize);
+        if (opcode == 0x9) {
+            send(0xA, data);
+        }
+        if (opcode != 0x1) {
+            String noTextMsg = "No Text message: opcode: " + opcode + "; data: " + utf8ToString(data);
+            logger.info(noTextMsg);
+        }
+        if (opcode == 0x0) {
+            throw new WebSocketException("Continuation frames aren't supported :" + utf8ToString(data) + ".");
+        }
+    }
 
-        //dataSize
+    private int getDataSize(byte[] header) throws IOException, WebSocketException {
         int dataSize = header[1] & 0x7F;
         if (dataSize == 126) {
             byte[] extDataSize = new byte[2];
@@ -118,12 +131,14 @@ public class WebSocket extends Thread {
             connection.getInputStream().read(extDataSize, 0, 2);
             if (extDataSize[0] != 0 || extDataSize[1] != 0 || extDataSize[2] != 0 ||
                     extDataSize[3] != 0 || (extDataSize[4] & 0x80) != 0)
-                throw new WebSocketException("recv too big data-frame");
+                throw new WebSocketException("Received too big data-frame");
             dataSize = (extDataSize[4] << 24) + (extDataSize[5] << 16) +
                     (extDataSize[6] << 8) + (extDataSize[7] & 0xFF);
         }
+        return dataSize;
+    }
 
-        //mask
+    private void parseData(byte[] header, int dataSize) throws IOException {
         boolean isMasked = (header[1] & 0x80) != 0;
         byte[] mask = null;
         if (isMasked) {
@@ -131,22 +146,12 @@ public class WebSocket extends Thread {
             connection.getInputStream().read(mask, 0, 4);
         }
 
-        //data + unmask
         data = new byte[dataSize];
         connection.getInputStream().read(data, 0, dataSize);
         if (isMasked) {
-            for (int i = 0; i < dataSize; i++)
+            for (int i = 0; i < dataSize; i++) {
                 data[i] = (byte) (data[i] ^ mask[i % 4]);
-        }
-        if (opcode == 0x9) {
-            send(0xA, data);
-        }
-        if (opcode != 0x1) {
-            String noTextMsg = "No Text message: opcode: " + opcode + "; data: " + utf8ToString(data);
-            logger.info(noTextMsg);
-        }
-        if (opcode == 0x0) {
-            throw new WebSocketException("Continuation frames aren't supported :" + utf8ToString(data) + ".");
+            }
         }
     }
 
