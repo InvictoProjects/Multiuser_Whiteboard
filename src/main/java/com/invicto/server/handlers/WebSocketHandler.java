@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class WebSocketHandler implements HttpHandler {
     private final Map<WebSocket, User> users = new HashMap<>();
