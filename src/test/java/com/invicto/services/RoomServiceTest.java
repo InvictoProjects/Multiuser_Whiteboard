@@ -95,7 +95,9 @@ public class RoomServiceTest {
         when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         when(mockedUserRepo.existsById(2)).thenReturn(true);
         service.deleteUser(user2.getId(), roomId);
-        verify(mockedRoomRepo, times(1)).update(room1);
+        verify(mockedRoomRepo, times(1)).findById(roomId);
+        verify(mockedUserRepo, times(1)).findById(user2.getId());
+//        verify(mockedRoomRepo, times(1)).update(room1);
         when(mockedUserRepo.existsById(2)).thenReturn(false);
         service.deleteUser(user2.getId(), roomId);
     }
