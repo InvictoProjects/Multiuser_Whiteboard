@@ -1,5 +1,6 @@
 # Multiuser Whiteboard
 
+[![Github Actions Badge](https://github.com/InvictoProjects/Multiuser_Whiteboard/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/InvictoProjects/Multiuser_Whiteboard/actions?query=workflow%3A%22Java+CI+with+Maven%22)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/fed4c742f21e4c69b22a6b55c9ff0710)](https://app.codacy.com/gh/InvictoProjects/Multiuser_Whiteboard?utm_source=github.com&utm_medium=referral&utm_content=InvictoProjects/Multiuser_Whiteboard&utm_campaign=Badge_Grade_Settings)
 
 ## Relevance
