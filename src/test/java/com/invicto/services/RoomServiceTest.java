@@ -19,8 +19,8 @@ import static org.mockito.Mockito.*;
 public class RoomServiceTest {
 
     private RoomService service;
-    private RoomRepository mockedRepo1;
-    private UserRepository mockedRepo2;
+    private RoomRepository mockedRoomRepo;
+    private UserRepository mockedUserRepo;
     private String roomId;
     private Room room1;
     private Room room2;
@@ -37,14 +37,15 @@ public class RoomServiceTest {
     @Before
     public void setUp() {
         roomId = "AqZBfqXMzYKA7szXzLza";
-        mockedRepo1 = mock(RoomRepository.class);
-        mockedRepo2 = mock(UserRepository.class);
-        service = new RoomService(mockedRepo1, mockedRepo2);
+        mockedRoomRepo = mock(RoomRepository.class);
+        mockedUserRepo = mock(UserRepository.class);
+        service = new RoomService(mockedRoomRepo, mockedUserRepo);
         user1 = new User(1, "Yahoo", "1", UserType.OWNER, true, true);
         user2 = new User(2, "Makoto", "1", UserType.GUEST, true, true);
         user3 = new User(3, "Barry", roomId, UserType.GUEST, false, false);
         participants.add(user1);
         participants.add(user2);
+        participants.add(user3);
         Shape shape1 = new Shape(roomId, "path('(1, 5), (15, 20)')", 3, false, false, "#000");
         shape2 = new Shape(roomId, "path('(5, 1), (20, 30)')", 3, false, false, "#000");
         shapes.add(shape1);
@@ -59,109 +60,115 @@ public class RoomServiceTest {
 
     @Test(expected = EntityExistsException.class)
     public void save() throws PermissionException {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         service.save(user1, room1);
-        verify(mockedRepo1, times(1)).save(room1);
-        when(mockedRepo1.existsById(room2.getId())).thenReturn(false);
+        verify(mockedRoomRepo, times(1)).save(room1);
+        when(mockedRoomRepo.existsById(room2.getId())).thenReturn(false);
         service.save(user1, room2);
     }
 
     @Test(expected = EntityNotExistsException.class)
     public void delete() throws PermissionException {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         service.delete(user1, roomId);
-        verify(mockedRepo1, times(1)).delete(room1);
-        when(mockedRepo1.existsById(room2.getId())).thenReturn(false);
+        verify(mockedRoomRepo, times(1)).delete(room1);
+        when(mockedRoomRepo.existsById(room2.getId())).thenReturn(false);
         service.delete(user1, room2.getId());
     }
 
     @Test(expected = EntityNotExistsException.class)
     public void addUser() {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
-        when(mockedRepo2.existsById(2)).thenReturn(true);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
+        when(mockedUserRepo.existsById(2)).thenReturn(true);
         service.addUser(user2, roomId);
-        verify(mockedRepo1, times(1)).update(room1);
-        when(mockedRepo2.existsById(2)).thenReturn(false);
+        verify(mockedRoomRepo, times(1)).update(room1);
+        when(mockedUserRepo.existsById(2)).thenReturn(false);
         service.addUser(user2, roomId);
     }
 
     @Test(expected = EntityNotExistsException.class)
     public void deleteUser() {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
-        when(mockedRepo2.existsById(2)).thenReturn(true);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
+        when(mockedUserRepo.existsById(2)).thenReturn(true);
         service.deleteUser(user2.getId(), roomId);
-        when(mockedRepo2.existsById(2)).thenReturn(false);
+        verify(mockedRoomRepo, times(1)).update(room1);
+        when(mockedUserRepo.existsById(2)).thenReturn(false);
         service.deleteUser(user2.getId(), roomId);
     }
 
     @Test(expected = PermissionException.class)
     public void changeOwner() throws PermissionException {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
-        when(mockedRepo2.existsById(2)).thenReturn(true);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
+        when(mockedUserRepo.existsById(2)).thenReturn(true);
         service.changeOwner(user1, user2.getId(), roomId);
-        when(mockedRepo2.existsById(3)).thenReturn(true);
+        verify(mockedRoomRepo, times(0)).update(room1);
+        when(mockedUserRepo.existsById(3)).thenReturn(true);
         service.changeOwner(user3, user2.getId(), roomId);
     }
 
     @Test
     public void getUsers() {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         assertEquals(service.getUsers(roomId), participants);
     }
 
     @Test(expected = PermissionException.class)
     public void updateBackgroundColor() throws PermissionException {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         service.updateBackgroundColor(user1, roomId, "#111111");
+        verify(mockedRoomRepo, times(1)).update(room1);
         service.updateBackgroundColor(user2, roomId, "#111111");
     }
 
     @Test(expected = PermissionException.class)
     public void addShape() throws PermissionException {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         service.addShape(user2, roomId, shape2);
+        verify(mockedRoomRepo, times(1)).saveNewShape(shape2);
         service.addShape(user3, roomId, shape2);
     }
 
     @Test(expected = PermissionException.class)
     public void addMessage() throws PermissionException {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         service.addMessage(user2, roomId, message2);
+        verify(mockedRoomRepo, times(1)).saveNewMessage(message2);
         service.addMessage(user3, roomId, message2);
     }
 
     @Test(expected = PermissionException.class)
     public void deleteMessage() throws PermissionException {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         service.deleteMessage(user2, roomId, message1);
+        verify(mockedRoomRepo, times(1)).deleteMessage(message1);
         service.deleteMessage(user3, roomId, message1);
     }
 
     @Test
     public void findById() {
-        when(mockedRepo1.findById(roomId)).thenReturn(room1);
+        when(mockedRoomRepo.findById(roomId)).thenReturn(room1);
         assertEquals(room1, service.findById(room1.getId()));
     }
 
     @Test
     public void existsById() {
-        when(mockedRepo1.existsById(roomId)).thenReturn(true);
+        when(mockedRoomRepo.existsById(roomId)).thenReturn(true);
         assertTrue(service.existsById(roomId));
     }
 
     @Test
     public void findMessageById() {
-        when(mockedRepo1.findMessageById(1)).thenReturn(message1);
+        when(mockedRoomRepo.findMessageById(1)).thenReturn(message1);
         assertEquals(service.findMessageById(message1.getId()), message1);
     }
 }
