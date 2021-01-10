@@ -66,8 +66,7 @@ public class RoomRepositoryImpl implements RoomRepository {
                 List<Shape> shapes = getShapes(roomId);
                 List<Message> messages = getMessages(roomId);
                 String backgroundColor = result.getString(3);
-                Room room = new Room(roomId, owner, participants, shapes, messages, backgroundColor);
-                return room;
+                return new Room(roomId, owner, participants, shapes, messages, backgroundColor);
             } catch (SQLException e) {
                 return null;
             }
