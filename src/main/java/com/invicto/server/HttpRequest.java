@@ -1,7 +1,6 @@
 package com.invicto.server;
 
 import com.invicto.exceptions.HttpException;
-import com.invicto.exceptions.PermissionException;
 import com.invicto.server.handlers.ErrorHandler;
 import com.invicto.server.handlers.HttpHandler;
 
@@ -16,8 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HttpRequest implements Runnable {
@@ -34,9 +32,7 @@ public class HttpRequest implements Runnable {
     private String requestLine;
     private String requestType;
     private String path;
-    private String fullPath;
     private final Map<String, String> headers = new HashMap<>();
-    private final List<String> splitPath = new ArrayList<>();
     private final Map<String, String> params = new HashMap<>();
 
     public HttpRequest(HttpRouter router, Socket connection) throws IOException {
@@ -58,8 +54,8 @@ public class HttpRequest implements Runnable {
             } else {
                 determineHandler().handle(this, null);
             }
-        } catch (IOException | HttpException | PermissionException e) {
-            e.printStackTrace();
+        } catch (IOException | HttpException e) {
+            logger.log(Level.INFO, "Request Exception", e);
         }
     }
 
@@ -67,17 +63,12 @@ public class HttpRequest implements Runnable {
     public String toString() {
         return "HttpRequest from " + connection.getLocalAddress().getHostAddress() + "\n\t" +
                 "Request Line: " + requestLine + "\n\t\t" + "Request Type " + requestType +
-                "\n\t\t" + "Request Path " + fullPath;
+                "\n\t\t" + "Request Path " + path;
     }
 
-    public HttpResponse createResponse() throws IOException, HttpException, PermissionException {
+    public HttpResponse createResponse() throws IOException {
         HttpResponse response = new HttpResponse(this);
-        try {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> determineHandler().handle(this,  response));
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        determineHandler().handle(this, response);
         return response;
     }
 
@@ -111,7 +102,7 @@ public class HttpRequest implements Runnable {
             int contentLength = Integer.parseInt(headers.get("Content-Length"));
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < contentLength; i++) {
-                stringBuilder.append((char)input.read());
+                stringBuilder.append((char) input.read());
             }
             requestBuilder.append(stringBuilder.toString());
             String requestBody = stringBuilder.toString();
@@ -153,16 +144,12 @@ public class HttpRequest implements Runnable {
             throw new HttpException("Request line has a number of spaces other than 3.");
         }
         requestType = splitter[0].toUpperCase();
-        setFullPath(splitter[1]);
+        this.path = splitter[1];
+        parsePathParams(splitter[1]);
     }
 
-    public void setFullPath(String inPath) throws UnsupportedEncodingException {
-        this.fullPath = inPath;
-        path = inPath;
-        setSplitPath(inPath);
-    }
-
-    public void setSplitPath(String fullPath) throws UnsupportedEncodingException {
+    public void parsePathParams(String fullPath) throws UnsupportedEncodingException {
+        List<String> splitPath = new ArrayList<>();
         for (String segment : fullPath.substring(1).split("/")) {
             if (segment.isEmpty()) {
                 continue;
@@ -176,6 +163,7 @@ public class HttpRequest implements Runnable {
             String lastItem = splitPath.get(splitPath.size() - 1);
             splitPath.set(splitPath.size() - 1, lastItem.substring(0, lastItem.indexOf('?')));
             String[] data = lastItem.substring(lastItem.indexOf('?') + 1).split("&");
+            path = fullPath.substring(0, fullPath.indexOf('?'));
             params.putAll(parseInputData(data));
         }
     }
@@ -186,6 +174,10 @@ public class HttpRequest implements Runnable {
 
     public String getHttpRequest() {
         return stringRequest;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
     }
 }
 

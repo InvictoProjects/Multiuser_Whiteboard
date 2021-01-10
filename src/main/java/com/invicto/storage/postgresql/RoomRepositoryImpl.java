@@ -180,15 +180,19 @@ public class RoomRepositoryImpl implements RoomRepository {
     public Message findMessageById(int messageId) {
         String statement = "SELECT * FROM Messages WHERE id = " + messageId;
         ResultSet result = connector.executeQuery(statement);
-        try {
-        	result.next();
-            String roomId = result.getString("room_id");
-            int senderId = result.getInt(3);
-            User sender = userRepository.findById(senderId);
-            LocalTime time = result.getTime(4).toLocalTime();
-            String text = result.getString(5);
-            return new Message(messageId, roomId, sender, time, text);
-        } catch (SQLException e) {
+        if (result != null) {
+            try {
+                result.next();
+                String roomId = result.getString("room_id");
+                int senderId = result.getInt(3);
+                User sender = userRepository.findById(senderId);
+                LocalTime time = result.getTime(4).toLocalTime();
+                String text = result.getString(5);
+                return new Message(messageId, roomId, sender, time, text);
+            } catch (SQLException e) {
+                return null;
+            }
+        } else {
             return null;
         }
     }

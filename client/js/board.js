@@ -2,9 +2,19 @@
 
 let webSocket;
 
-window.addEventListener("load", () => {
+async function sendLogin() {
+    const userName = document.getElementById('userName').value;
+    webSocket.send('login=' + userName);
+}
 
-    function setup() {
+async function sendMessage() {
+    const messageText = document.getElementById('messageText').value;
+    webSocket.send('message=' + messageText);
+}
+
+window.addEventListener('load', () => {
+
+    function setupWebSocket() {
         const loc = window.location;
         const url = 'ws://' + loc.host + loc.pathname + '/ws';
         webSocket = new WebSocket(url);
@@ -17,16 +27,16 @@ window.addEventListener("load", () => {
                 showMessage(data.substring(7));
             }
             if (data.startsWith('drawn shapes')) {
-                const pathArray = data.split("\n");
-                for (let path of pathArray) {
+                const pathArray = data.split('\n');
+                for (const path of pathArray) {
                     if (path !== 'drawn shapes' && path !== '') {
                         drawShapeByData(path);
                     }
                 }
             }
             if (data.startsWith('sent messages')) {
-                const messagesArray = data.split("\n");
-                for (let message of messagesArray) {
+                const messagesArray = data.split('\n');
+                for (const message of messagesArray) {
                     if (message !== 'sent messages' && message !== '') {
                         showMessage(message);
                     }
@@ -35,40 +45,36 @@ window.addEventListener("load", () => {
         };
     }
 
-    function drawShapeByData(data) {
-        const points = data.substring(4);
-        const pointsArr = points.substring(2, points.length - 2).split(',');
-        drawShape(pointsArr);
-        ctx.beginPath();
-    }
-
     function showMessage(data) {
         const chatElement = document.getElementById('chatMessages');
         const message = JSON.parse(data);
         const sender = document.createTextNode(message.sender);
         const time = document.createTextNode(message.time);
-        const text = document.createTextNode("\n" + message.text);
-        const messageElement = document.createElement("p");
-        const senderSpan = document.createElement("span");
-        senderSpan.style.color = "gray";
+        const text = document.createTextNode('\n' + message.text);
+        const messageElement = document.createElement('p');
+        const senderSpan = document.createElement('span');
+        senderSpan.style.color = 'gray';
         senderSpan.appendChild(sender);
-        const timeSpan = document.createElement("span");
-        timeSpan.style.color = "gray";
+        const timeSpan = document.createElement('span');
+        timeSpan.style.color = 'gray';
         timeSpan.appendChild(time);
-        timeSpan.style.float = "right";
+        timeSpan.style.float = 'right';
         messageElement.appendChild(senderSpan);
         messageElement.appendChild(text);
         messageElement.appendChild(timeSpan);
         chatElement.appendChild(messageElement);
     }
 
-    setup();
+    setupWebSocket();
+
+    document.getElementById('sendMessage').onclick = sendMessage;
+    document.getElementById('sendLogin').onclick = sendLogin;
 
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
 
     canvas.height = window.innerHeight * 0.98;
-    canvas.width = window.innerWidth * 0.70;
+    canvas.width = window.innerWidth * 0.7;
 
     let painting = false;
     let pointArray;
@@ -88,13 +94,13 @@ window.addEventListener("load", () => {
     }
 
     function draw(e) {
-        if(!painting) return;
+        if (!painting) return;
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
 
-        let pos = getMousePos(canvas, e);
-        let x = pos.x;
-        let y = pos.y;
+        const pos = getMousePos(canvas, e);
+        const x = pos.x;
+        const y = pos.y;
         pointArray.push(x, y);
         ctx.lineTo(x, y);
         ctx.stroke();
@@ -103,11 +109,18 @@ window.addEventListener("load", () => {
     }
 
     function getMousePos(canvas1, e) {
-        let rect = canvas1.getBoundingClientRect();
+        const rect = canvas1.getBoundingClientRect();
         return {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
+    }
+
+    function drawShapeByData(data) {
+        const points = data.substring(4);
+        const pointsArr = points.substring(2, points.length - 2).split(',');
+        drawShape(pointsArr);
+        ctx.beginPath();
     }
 
     function drawShape(arr) {
@@ -127,13 +140,3 @@ window.addEventListener("load", () => {
     canvas.addEventListener('mouseup', finishedPosition);
     canvas.addEventListener('mousemove', draw);
 });
-
-async function sendLogin() {
-    const userName = document.getElementById('userName').value;
-    webSocket.send("login=" + userName);
-}
-
-async function sendMessage() {
-    const messageText = document.getElementById('messageText').value;
-    webSocket.send("message=" + messageText);
-}
