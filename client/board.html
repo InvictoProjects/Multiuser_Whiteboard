@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multiuser Whiteboard</title>
+</head>
+<body>
+<link rel="stylesheet" href="css/board.css">
+<div id="all">
+    <div id="board">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div id="chatContainer">
+        <div id="chatMessages"></div>
+        <div id="chatBottom">
+            <div>
+                <label>
+                    <input type="text" id="userName">
+                </label>
+                <button id="sendLogin">
+                    Змінити логін
+                </button>
+            </div>
+            <div>
+                <label>
+                    <input type="text" id="messageText">
+                </label>
+                <button id="sendMessage">
+                    Надіслати
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/board.js"></script>
+</html>

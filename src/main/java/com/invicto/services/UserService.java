@@ -43,6 +43,15 @@ public class UserService {
         }
     }
 
+    public void updateRoomId(User caller, String roomId) throws PermissionException {
+        if (userRepository.existsById(caller.getId())) {
+            caller.setRoomId(roomId);
+            userRepository.update(caller);
+        } else {
+            throw notEnoughPermission(caller);
+        }
+    }
+
     public void updatePermissions(User caller, User editedUser, Room room, boolean wPermission, boolean dPermission) throws PermissionException {
         List<User> participants = room.getParticipants();
         boolean isTheSameRoom = (participants.contains(caller) && participants.contains(editedUser));
