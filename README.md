@@ -1,5 +1,7 @@
 # Multiuser Whiteboard
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fed4c742f21e4c69b22a6b55c9ff0710)](https://app.codacy.com/gh/InvictoProjects/Multiuser_Whiteboard?utm_source=github.com&utm_medium=referral&utm_content=InvictoProjects/Multiuser_Whiteboard&utm_campaign=Badge_Grade_Settings)
+
 ## Relevance
 Online learning is becoming more popular today. No doubt, it is both a convenience and a challenge. It gives you a great deal of flexibility, but with that freedom sometimes you need to solve more different problems such as organizing of online learning and convenient presentation of information. For this reason, our team is developing an application that will make your online learning better.
 
