@@ -1,6 +1,9 @@
 package com.invicto.server;
 
+import com.invicto.exceptions.HttpException;
 import com.invicto.exceptions.PermissionException;
+import com.invicto.server.handlers.ErrorHandler;
+import com.invicto.server.handlers.HttpHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 public class HttpRequest implements Runnable {
@@ -67,7 +72,12 @@ public class HttpRequest implements Runnable {
 
     public HttpResponse createResponse() throws IOException, HttpException, PermissionException {
         HttpResponse response = new HttpResponse(this);
-        determineHandler().handle(this,  response);
+        try {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> determineHandler().handle(this,  response));
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
         return response;
     }
 

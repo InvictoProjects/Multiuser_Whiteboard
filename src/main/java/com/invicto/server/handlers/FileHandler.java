@@ -1,4 +1,7 @@
-package com.invicto.server;
+package com.invicto.server.handlers;
+
+import com.invicto.server.HttpRequest;
+import com.invicto.server.HttpResponse;
 
 import java.io.File;
 import java.io.FileNotFoundException;

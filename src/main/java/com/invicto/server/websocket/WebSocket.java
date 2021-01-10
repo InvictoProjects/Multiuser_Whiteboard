@@ -1,7 +1,8 @@
-package com.invicto.server;
+package com.invicto.server.websocket;
+
+import com.invicto.exceptions.WebSocketException;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

@@ -1,6 +1,6 @@
 package com.invicto;
 
-import com.invicto.server.CreateHandler;
+import com.invicto.server.handlers.CreateHandler;
 import com.invicto.server.HttpRouter;
 import com.invicto.server.HttpServer;
 import com.invicto.services.RoomService;

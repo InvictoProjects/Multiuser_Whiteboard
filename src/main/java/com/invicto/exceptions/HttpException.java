@@ -1,4 +1,4 @@
-package com.invicto.server;
+package com.invicto.exceptions;
 
 public class HttpException extends Exception {
 

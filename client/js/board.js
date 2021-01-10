@@ -128,12 +128,12 @@ window.addEventListener("load", () => {
     canvas.addEventListener('mousemove', draw);
 });
 
-function sendLogin() {
+async function sendLogin() {
     const userName = document.getElementById('userName').value;
     webSocket.send("login=" + userName);
 }
 
-function sendMessage() {
+async function sendMessage() {
     const messageText = document.getElementById('messageText').value;
     webSocket.send("message=" + messageText);
 }

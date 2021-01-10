@@ -1,5 +1,6 @@
-package com.invicto.server;
+package com.invicto.server.handlers;
 
+import com.invicto.server.*;
 import com.invicto.services.RoomService;
 import com.invicto.services.UserService;
 
