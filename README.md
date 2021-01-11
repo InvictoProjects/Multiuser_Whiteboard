@@ -9,7 +9,10 @@ Online learning is becoming more popular today. No doubt, it is both a convenien
 
 ## Concept
 Multiuser Whiteboard is a web application that helps you communicate more easily with other people by visualizing your thoughts on an interactive whiteboard. Users are able to create or join virtual rooms, they can watch and interact with a shared graphics editor. Each user also has the opportunity to communicate through text chat.
+## About Program
+MULTIUSER WHITEBOARD is a free and open online board for many users to work together. Here you can draw your ideas and discuss them with others. The board is updated in real time for all connected users. It can be used for various purposes such as art, entertainment, design and education. To work together on the board, just share the URL to others. You can create a personal board with a random name, which will only be available at the appropriate link, and you can join a specific board by its name.
 
+The program implements its own server based on the ServerSocket Java class. When a user connects to the board, a WebSocket is initialized, which allows all participants on a particular board to receive changes in real time. The program uses asynchronous programming and multithreading.
 ## Built with
 #### Back-end
 * Java 11
