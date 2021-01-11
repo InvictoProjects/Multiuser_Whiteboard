@@ -199,7 +199,7 @@ public class RoomRepositoryImpl implements RoomRepository {
     @Override
     public void deleteMessage(Message message) {
         Integer id = message.getId();
-        String statement = "DELETE FROM Messages WHERE id" + id;
+        String statement = "DELETE FROM Messages WHERE id = " + id;
         connector.executeUpdate(statement);
     }
 }
