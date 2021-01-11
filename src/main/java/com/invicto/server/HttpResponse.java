@@ -1,5 +1,7 @@
 package com.invicto.server;
 
+import com.invicto.exceptions.HttpException;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;

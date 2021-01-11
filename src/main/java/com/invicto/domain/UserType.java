@@ -4,7 +4,7 @@ public enum UserType {
     GUEST ("room_guest"),
     OWNER ("room_owner");
 
-    private String title;
+    private final String title;
 
     UserType(String title) {
         this.title = title;

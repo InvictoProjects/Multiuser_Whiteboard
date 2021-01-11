@@ -1,6 +1,9 @@
-package com.invicto.server;
+package com.invicto.server.handlers;
 
-class ErrorHandler implements HttpHandler {
+import com.invicto.server.HttpRequest;
+import com.invicto.server.HttpResponse;
+
+public class ErrorHandler implements HttpHandler {
 
   private final int code;
 

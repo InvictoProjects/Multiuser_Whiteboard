@@ -66,8 +66,7 @@ public class RoomRepositoryImpl implements RoomRepository {
                 List<Shape> shapes = getShapes(roomId);
                 List<Message> messages = getMessages(roomId);
                 String backgroundColor = result.getString(3);
-                Room room = new Room(roomId, owner, participants, shapes, messages, backgroundColor);
-                return room;
+                return new Room(roomId, owner, participants, shapes, messages, backgroundColor);
             } catch (SQLException e) {
                 return null;
             }
@@ -180,15 +179,19 @@ public class RoomRepositoryImpl implements RoomRepository {
     public Message findMessageById(int messageId) {
         String statement = "SELECT * FROM Messages WHERE id = " + messageId;
         ResultSet result = connector.executeQuery(statement);
-        try {
-        	result.next();
-            String roomId = result.getString("room_id");
-            int senderId = result.getInt(3);
-            User sender = userRepository.findById(senderId);
-            LocalTime time = result.getTime(4).toLocalTime();
-            String text = result.getString(5);
-            return new Message(messageId, roomId, sender, time, text);
-        } catch (SQLException e) {
+        if (result != null) {
+            try {
+                result.next();
+                String roomId = result.getString("room_id");
+                int senderId = result.getInt(3);
+                User sender = userRepository.findById(senderId);
+                LocalTime time = result.getTime(4).toLocalTime();
+                String text = result.getString(5);
+                return new Message(messageId, roomId, sender, time, text);
+            } catch (SQLException e) {
+                return null;
+            }
+        } else {
             return null;
         }
     }
@@ -196,7 +199,7 @@ public class RoomRepositoryImpl implements RoomRepository {
     @Override
     public void deleteMessage(Message message) {
         Integer id = message.getId();
-        String statement = "DELETE FROM Messages WHERE id" + id;
+        String statement = "DELETE FROM Messages WHERE id = " + id;
         connector.executeUpdate(statement);
     }
 }

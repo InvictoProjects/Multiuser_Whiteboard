@@ -1,4 +1,4 @@
-package com.invicto.server;
+package com.invicto.server.websocket;
 
 public interface WsEventListener {
 

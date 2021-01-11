@@ -20,10 +20,6 @@ public class Room {
 		this.backgroundColor = backgroundColor;
 	}
 
-	public boolean isOwner(User user) {
-		return user.getUserType() == UserType.OWNER && user == owner;
-	}
-
 	public String getId() {
 		return id;
 	}
