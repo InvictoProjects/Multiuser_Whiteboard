@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HttpServer implements Runnable {
+public class HttpServer {
 
     public static final int DEFAULT_PORT = 8080;
     private final Logger logger = Logger.getLogger(HttpServer.class.getName());
